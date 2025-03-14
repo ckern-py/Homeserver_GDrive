@@ -1,3 +1,5 @@
+using GDriveWorker.Domain;
+using GDriveWorker.Metadata;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
@@ -10,12 +12,14 @@ namespace Homeserver_GDrive.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private ISQLiteDB _liteDB;
     static string[] Scopes = { DriveService.Scope.Drive };
     static string ApplicationName = "penthouse-gdrive";
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, ISQLiteDB liteDB)
     {
         _logger = logger;
+        _liteDB = liteDB;
     }
 
     public IActionResult Index()
@@ -36,12 +40,7 @@ public class HomeController : Controller
         aboutUser.Fields = "kind,user,storageQuota";
         Google.Apis.Drive.v3.Data.About userInfo = aboutUser.Execute();
 
-        List<UploadInfo> fileInfo = new List<UploadInfo>();
-        for (int i = 0; i < 5; i++)
-        {
-            UploadInfo file = new UploadInfo() { FileName = $"File_{i}.txt", UploadDT = DateTime.Now.ToString() };
-            fileInfo.Add(file);
-        }
+        List<UploadInfo> fileInfo = _liteDB.LastFiveUploads();
 
         return View(new HomeViewModel() { ServiceAccountName = userInfo.User.DisplayName, uploadInfo = fileInfo });
     }

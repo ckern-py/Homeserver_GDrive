@@ -1,4 +1,4 @@
-﻿namespace Homeserver_GDrive.Models
+﻿namespace GDriveWorker.Metadata
 {
     public class UploadInfo
     {
@@ -6,3 +6,4 @@
         public string UploadDT { get; set; } = "";
     }
 }
+
