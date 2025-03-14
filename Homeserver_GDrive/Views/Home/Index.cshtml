@@ -4,6 +4,27 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Running service as: @Model.ServiceAccountName.</p>
+    <h2 class="display-4">Running service as:</h2>
+
+    <b>@Model.ServiceAccountName</b>
 </div>
+
+<body>
+    @foreach (UploadInfo uploadInfo in Model.uploadInfo)
+    {
+        <div class="container pt-2">
+            <div class="row ">
+                <div class="col-sm-4" style=" border: 1px solid;">
+                    <div>
+                        <b>FileName:</b> @uploadInfo.FileName
+                    </div>
+                </div>
+                <div class="col-sm-4" style=" border: 1px solid;">
+                    <div >
+                        <b>Upload Time:</b> @uploadInfo.UploadDT
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</body>

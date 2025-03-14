@@ -1,9 +1,9 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using Homeserver_GDrive.Models;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+using Homeserver_GDrive.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Homeserver_GDrive.Controllers;
 
@@ -36,7 +36,14 @@ public class HomeController : Controller
         aboutUser.Fields = "kind,user,storageQuota";
         Google.Apis.Drive.v3.Data.About userInfo = aboutUser.Execute();
 
-        return View(new HomeViewModel() { ServiceAccountName = userInfo.User.DisplayName });
+        List<UploadInfo> fileInfo = new List<UploadInfo>();
+        for (int i = 0; i < 5; i++)
+        {
+            UploadInfo file = new UploadInfo() { FileName = $"File_{i}.txt", UploadDT = DateTime.Now.ToString() };
+            fileInfo.Add(file);
+        }
+
+        return View(new HomeViewModel() { ServiceAccountName = userInfo.User.DisplayName, uploadInfo = fileInfo });
     }
 
     public IActionResult Privacy()
