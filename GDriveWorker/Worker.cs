@@ -3,10 +3,12 @@ namespace GDriveWorker
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly int _delayTime;
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(ILogger<Worker> logger, int milliSeconds)
         {
             _logger = logger;
+            _delayTime = milliSeconds;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -15,9 +17,9 @@ namespace GDriveWorker
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                    _logger.LogInformation("{delayTime} Worker running at: {time}", _delayTime, DateTimeOffset.Now);
                 }
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(_delayTime, stoppingToken);
             }
         }
     }

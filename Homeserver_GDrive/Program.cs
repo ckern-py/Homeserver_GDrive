@@ -10,7 +10,9 @@ namespace Homeserver_GDrive
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddHostedService<Worker>();
+            builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 3000));
+            //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 5000));
+            //builder.Services.AddHostedService<Worker>();
 
             var app = builder.Build();
 
