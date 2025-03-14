@@ -1,4 +1,5 @@
 using GDriveWorker;
+using System.Data.SQLite;
 
 namespace Homeserver_GDrive
 {
@@ -6,6 +7,10 @@ namespace Homeserver_GDrive
     {
         public static void Main(string[] args)
         {
+            SQLiteConnection sqlite_conn;
+            sqlite_conn = CreateConnection();
+            CreateTable(sqlite_conn);
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -36,6 +41,32 @@ namespace Homeserver_GDrive
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+        }
+
+        static SQLiteConnection CreateConnection()
+        {
+            SQLiteConnection sqlite_conn;
+            // Create a new database connection:
+            sqlite_conn = new SQLiteConnection("Data Source=upload.db; Version = 3; New = True; Compress = True; ");
+            // Open the connection:
+            try
+            {
+                sqlite_conn.Open();
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return sqlite_conn;
+        }
+
+        static void CreateTable(SQLiteConnection conn)
+        {
+            SQLiteCommand sqlite_cmd;
+            string Createsql = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
+            sqlite_cmd = conn.CreateCommand();
+            sqlite_cmd.CommandText = Createsql;
+            sqlite_cmd.ExecuteNonQuery();
         }
     }
 }
