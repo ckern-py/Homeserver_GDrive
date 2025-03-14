@@ -1,3 +1,5 @@
+using GDriveWorker;
+
 namespace Homeserver_GDrive
 {
     public class Program
@@ -8,6 +10,7 @@ namespace Homeserver_GDrive
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddHostedService<Worker>();
 
             var app = builder.Build();
 

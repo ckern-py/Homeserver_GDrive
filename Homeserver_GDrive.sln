@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35825.156 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Homeserver_GDrive", "Homeserver_GDrive\Homeserver_GDrive.csproj", "{8186373A-10EB-43DC-939C-E00D4E876E61}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GDriveWorker", "GDriveWorker\GDriveWorker.csproj", "{4D477DFD-0C98-4604-BB1B-3B9D9E45B1FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8186373A-10EB-43DC-939C-E00D4E876E61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8186373A-10EB-43DC-939C-E00D4E876E61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8186373A-10EB-43DC-939C-E00D4E876E61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D477DFD-0C98-4604-BB1B-3B9D9E45B1FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D477DFD-0C98-4604-BB1B-3B9D9E45B1FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D477DFD-0C98-4604-BB1B-3B9D9E45B1FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D477DFD-0C98-4604-BB1B-3B9D9E45B1FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
