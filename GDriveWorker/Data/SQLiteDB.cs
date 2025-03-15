@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GDriveWorker.Domain;
+﻿using GDriveWorker.Domain;
 using GDriveWorker.Metadata;
+using System.Data.SQLite;
 
 namespace GDriveWorker.Data
 {
     public class SQLiteDB : ISQLiteDB
     {
+        public static void Initialize(IServiceProvider serviceProvider)
+        {
+            SQLiteConnection localDBConn = CreateConnection();
+
+            SQLiteCommand newTableCmd;
+            string createTable = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
+            newTableCmd = localDBConn.CreateCommand();
+            newTableCmd.CommandText = createTable;
+            newTableCmd.ExecuteNonQuery();
+        }
+
         public List<UploadInfo> LastFiveUploads()
         {
             List<UploadInfo> fileList = new List<UploadInfo>();

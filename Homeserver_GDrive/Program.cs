@@ -10,10 +10,6 @@ namespace Homeserver_GDrive
     {
         public static void Main(string[] args)
         {
-            SQLiteConnection localDBConn;
-            localDBConn = CreateConnection();
-            CreateTable(localDBConn);
-
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -24,6 +20,12 @@ namespace Homeserver_GDrive
             //builder.Services.AddHostedService<Worker>();
 
             var app = builder.Build();
+
+            using (IServiceScope scope = app.Services.CreateScope())
+            {
+                IServiceProvider services = scope.ServiceProvider;
+                SQLiteDB.Initialize(services);
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -45,32 +47,6 @@ namespace Homeserver_GDrive
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
-        }
-
-        static SQLiteConnection CreateConnection()
-        {
-            SQLiteConnection sqliteConn;
-            // Create a new database connection:
-            sqliteConn = new SQLiteConnection("Data Source=upload.db; Version = 3; New = True; Compress = True; ");
-            // Open the connection:
-            try
-            {
-                sqliteConn.Open();
-            }
-            catch (Exception ex)
-            {
-
-            }
-            return sqliteConn;
-        }
-
-        static void CreateTable(SQLiteConnection conn)
-        {
-            SQLiteCommand newTableCmd;
-            string createTable = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
-            newTableCmd = conn.CreateCommand();
-            newTableCmd.CommandText = createTable;
-            newTableCmd.ExecuteNonQuery();
         }
     }
 }

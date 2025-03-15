@@ -30,5 +30,10 @@ namespace GDriveWorker
                 await Task.Delay(_delayTime, stoppingToken);
             }
         }
+
+        //private async Task KeepDBClean()
+        //{
+        //    _sqliteDB
+        //}
     }
 }
