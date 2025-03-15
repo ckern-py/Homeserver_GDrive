@@ -1,5 +1,4 @@
 using GDriveWorker.Domain;
-using GDriveWorker.Metadata;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
@@ -40,9 +39,15 @@ public class HomeController : Controller
         aboutUser.Fields = "kind,user,storageQuota";
         Google.Apis.Drive.v3.Data.About userInfo = aboutUser.Execute();
 
-        List<UploadInfo> fileInfo = _liteDB.LastFiveUploads();
+        //List<UploadInfo> fileInfo = _liteDB.LastFiveUploads();
+        HomeViewModel viewInfo = new HomeViewModel()
+        {
+            ServiceAccountName = userInfo.User.DisplayName,
+            uploadInfo = _liteDB.LastFiveUploads(),
+            recordCount = _liteDB.CountRecords()
+        };
 
-        return View(new HomeViewModel() { ServiceAccountName = userInfo.User.DisplayName, uploadInfo = fileInfo });
+        return View(viewInfo);
     }
 
     public IActionResult Privacy()

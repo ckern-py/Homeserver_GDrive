@@ -20,15 +20,13 @@ namespace GDriveWorker.Data
         public List<UploadInfo> LastFiveUploads()
         {
             List<UploadInfo> fileList = new List<UploadInfo>();
-            SQLiteConnection lastFiveConn;
-            lastFiveConn = CreateConnection();
 
-            SQLiteDataReader sqliteDatareader;
-            SQLiteCommand lastFiveCmd;
-            lastFiveCmd = lastFiveConn.CreateCommand();
+            SQLiteConnection lastFiveConn = CreateConnection();
+
+            SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
             lastFiveCmd.CommandText = "SELECT * FROM FileUploads ORDER BY UploadDT DESC LIMIT 5";
 
-            sqliteDatareader = lastFiveCmd.ExecuteReader();
+            SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
             while (sqliteDatareader.Read())
             {
                 UploadInfo info = new UploadInfo()
@@ -45,14 +43,36 @@ namespace GDriveWorker.Data
 
         public int InsertUploadRecord(string fileName, string uploadDT)
         {
-            SQLiteConnection newInsertConn;
-            newInsertConn = CreateConnection();
+            SQLiteConnection newInsertConn = CreateConnection();
 
-            SQLiteCommand insertComand;
-            insertComand = newInsertConn.CreateCommand();
+            SQLiteCommand insertComand = newInsertConn.CreateCommand();
             insertComand.CommandText = $"INSERT INTO FileUploads(FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
             int records = insertComand.ExecuteNonQuery();
             newInsertConn.Close();
+            return records;
+        }
+
+        public int DeleteOldRecords()
+        {
+            SQLiteConnection newDeleteConn = CreateConnection();
+
+            SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
+            //deleteComand.CommandText = $"INSERT INTO FileUploads(FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
+            deleteComand.CommandText = $"DELETE FROM FileUploads WHERE UploadDT NOT IN (SELECT UploadDT FROM FileUploads ORDER BY UploadDT DESC LIMIT 50)";
+            int records = deleteComand.ExecuteNonQuery();
+            newDeleteConn.Close();
+            return records;
+
+        }
+
+        public int CountRecords()
+        {
+            SQLiteConnection newCountConn = CreateConnection();
+
+            SQLiteCommand countComand = newCountConn.CreateCommand();
+            countComand.CommandText = $"SELECT COUNT(*) FROM FileUploads";
+            int records = Convert.ToInt32(countComand.ExecuteScalar());
+            newCountConn.Close();
             return records;
         }
 

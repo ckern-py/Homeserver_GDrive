@@ -11,5 +11,7 @@ namespace GDriveWorker.Domain
     {
         List<UploadInfo> LastFiveUploads();
         int InsertUploadRecord(string fileName, string uploadDT);
+        int DeleteOldRecords();
+        int CountRecords();
     }
 }
