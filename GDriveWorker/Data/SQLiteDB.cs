@@ -57,7 +57,6 @@ namespace GDriveWorker.Data
             SQLiteConnection newDeleteConn = CreateConnection();
 
             SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-            //deleteComand.CommandText = $"INSERT INTO FileUploads(FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
             deleteComand.CommandText = $"DELETE FROM FileUploads WHERE UploadDT NOT IN (SELECT UploadDT FROM FileUploads ORDER BY UploadDT DESC LIMIT 50)";
             int records = deleteComand.ExecuteNonQuery();
             newDeleteConn.Close();

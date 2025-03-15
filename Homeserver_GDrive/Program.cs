@@ -17,9 +17,10 @@ namespace Homeserver_GDrive
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSingleton<ISQLiteDB, SQLiteDB>();
-            builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 10000, sp.GetService<ISQLiteDB>()));
+            //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 10000, sp.GetService<ISQLiteDB>()));
             //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 5000));
-            //builder.Services.AddHostedService<Worker>();
+            builder.Services.AddHostedService<UploadService>();
+            builder.Services.AddHostedService<DBMaintenance>();
 
             WebApplication app = builder.Build();
             
