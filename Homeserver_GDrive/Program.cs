@@ -10,7 +10,9 @@ namespace Homeserver_GDrive
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+            SQLiteDB.InitializeDB();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -19,14 +21,8 @@ namespace Homeserver_GDrive
             //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 5000));
             //builder.Services.AddHostedService<Worker>();
 
-            var app = builder.Build();
-
-            using (IServiceScope scope = app.Services.CreateScope())
-            {
-                IServiceProvider services = scope.ServiceProvider;
-                SQLiteDB.Initialize(services);
-            }
-
+            WebApplication app = builder.Build();
+            
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {

@@ -6,7 +6,7 @@ namespace GDriveWorker.Data
 {
     public class SQLiteDB : ISQLiteDB
     {
-        public static void Initialize(IServiceProvider serviceProvider)
+        public static void InitializeDB()
         {
             SQLiteConnection localDBConn = CreateConnection();
 
@@ -58,9 +58,7 @@ namespace GDriveWorker.Data
 
         private static SQLiteConnection CreateConnection()
         {
-            SQLiteConnection uploadDBSQLiteConn;
-            // Create a new database connection:
-            uploadDBSQLiteConn = new SQLiteConnection("Data Source=upload.db; Version = 3; New = True; Compress = True; ");
+            SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=upload.db; Version = 3; New = True; Compress = True; ");
             // Open the connection:
             try
             {
