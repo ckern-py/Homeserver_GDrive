@@ -5,7 +5,7 @@ namespace GDriveWorker
     public class DBMaintenance : BackgroundService
     {
         private readonly ILogger<DBMaintenance> _logger;
-        private ISQLiteDB _sqliteDB;
+        private readonly ISQLiteDB _sqliteDB;
 
         public DBMaintenance(ILogger<DBMaintenance> logger, ISQLiteDB sqLiteDB)
         {
@@ -20,7 +20,7 @@ namespace GDriveWorker
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     int delCount = _sqliteDB.DeleteOldRecords();
-                    _logger.LogInformation($"Removed {delCount} Records");
+                    _logger.LogInformation("Removed {delCount} Records at {datetime}", delCount, DateTime.Now);
                 }
                 await Task.Delay(5000, stoppingToken);
             }

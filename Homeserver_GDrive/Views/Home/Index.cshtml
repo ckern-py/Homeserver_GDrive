@@ -8,21 +8,24 @@
     <h2 class="display-4">Running service as:</h2>
 
     <b>@Model.ServiceAccountName</b>
+
+    <br />
+    <br />
+    Showing 5 of @Model.recordCount records
+    <br />
 </div>
-<br />
-Showing 5 of @Model.recordCount records
-<br />
+
 <body>
     @foreach (UploadInfo uploadInfo in Model.uploadInfo)
     {
-        <div class="container pt-2">
+        <div class="container pt-2 w-100">
             <div class="row ">
-                <div class="col-sm-4" style=" border: 1px solid;">
+                <div class="col-sm-4 w-50" style=" border: 1px solid;">
                     <div>
                         <b>FileName:</b> @uploadInfo.FileName
                     </div>
                 </div>
-                <div class="col-sm-4" style=" border: 1px solid;">
+                <div class="col-sm-4 w-50" style=" border: 1px solid;">
                     <div >
                         <b>Upload Time:</b> @uploadInfo.UploadDT
                     </div>

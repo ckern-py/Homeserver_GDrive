@@ -5,14 +5,15 @@ namespace GDriveWorker
     public class UploadService : BackgroundService
     {
         private readonly ILogger<UploadService> _logger;
-        private ISQLiteDB _sqliteDB;
+        private readonly ISQLiteDB _sqliteDB;
         private readonly int _delayTime = 15000;
-        Random rand = new Random();
+        private readonly Random rand;
 
         public UploadService(ILogger<UploadService> logger, ISQLiteDB sqLiteDB)
         {
             _logger = logger;
-            _sqliteDB = sqLiteDB;            
+            _sqliteDB = sqLiteDB;
+            rand = new Random();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -22,18 +23,12 @@ namespace GDriveWorker
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     int num = rand.Next(100);
-                    _sqliteDB.InsertUploadRecord($"File_{num}", DateTime.Now.ToString());
-                    _logger.LogInformation($"File_{num} Inserted");
+                    string insertDT = DateTime.Now.ToString();
+                    _sqliteDB.InsertUploadRecord($"File_{num}", insertDT);
+                    _logger.LogInformation("File_{num} Inserted at {dateTime}", num, insertDT);
                 }
                 await Task.Delay(10000, stoppingToken);
             }
-        }
-
-        private async Task InsertFile()
-        {
-            int num = rand.Next(100);
-            _sqliteDB.InsertUploadRecord($"File_{num}", DateTime.Now.ToString());
-            _logger.LogInformation($"File_{num} Inserted");
         }
     }
 }
