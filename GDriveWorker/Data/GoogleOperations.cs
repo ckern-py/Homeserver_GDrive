@@ -12,6 +12,43 @@ namespace GDriveWorker.Data
 
         public Google.Apis.Drive.v3.Data.About GetUserInfo()
         {
+            DriveService driveService = SALogin();
+
+            AboutResource.GetRequest aboutUser = driveService.About.Get();
+            aboutUser.Fields = "kind,user,storageQuota";
+            return aboutUser.Execute();
+        }
+
+        public string FindFolderID(string folderName)
+        {
+            DriveService driveService = SALogin();
+
+            FilesResource.ListRequest folder = driveService.Files.List();
+            folder.Q = $"name = '{folderName}' and mimeType = 'application/vnd.google-apps.folder'";
+            Google.Apis.Drive.v3.Data.FileList foundFolder = folder.Execute();
+
+            return foundFolder.Files[0].Id;
+        }
+
+        public string CreatFolder(string folderID, string folderName)
+        {
+            DriveService driveService = SALogin();
+
+            Google.Apis.Drive.v3.Data.File newFolder = new Google.Apis.Drive.v3.Data.File()
+            {
+                Kind = "drive#file",
+                MimeType = "application/vnd.google-apps.folder",
+                Id = folderID,
+                Name = folderName
+            };
+
+            FilesResource.CreateRequest createRequest = driveService.Files.Create(newFolder);
+            Google.Apis.Drive.v3.Data.File folder = createRequest.Execute();
+            return folder.Id;
+        }
+
+        private static DriveService SALogin()
+        {
             GoogleCredential credential;
             using (FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read))
             {
@@ -24,9 +61,7 @@ namespace GDriveWorker.Data
                 ApplicationName = ApplicationName
             });
 
-            AboutResource.GetRequest aboutUser = driveService.About.Get();
-            aboutUser.Fields = "kind,user,storageQuota";
-            return aboutUser.Execute();
+            return driveService;
         }
     }
 }
