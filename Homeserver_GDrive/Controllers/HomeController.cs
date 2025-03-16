@@ -1,7 +1,4 @@
 using GDriveWorker.Domain;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Drive.v3;
-using Google.Apis.Services;
 using Homeserver_GDrive.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -12,38 +9,24 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly ISQLiteDB _liteDB;
-    private static readonly string[] Scopes = { DriveService.Scope.Drive };
-    private static readonly string ApplicationName = "penthouse-gdrive";
+    private readonly IGoogleOperations _googleOperations;
 
-    public HomeController(ILogger<HomeController> logger, ISQLiteDB liteDB)
+    public HomeController(ILogger<HomeController> logger, ISQLiteDB liteDB, IGoogleOperations googleOperations)
     {
         _logger = logger;
         _liteDB = liteDB;
+        _googleOperations = googleOperations;
     }
 
     public IActionResult Index()
     {
-        GoogleCredential credential;
-        using (FileStream stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
-        {
-            credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-        }
-
-        DriveService driveService = new DriveService(new BaseClientService.Initializer
-        {
-            HttpClientInitializer = credential,
-            ApplicationName = ApplicationName
-        });
-
-        AboutResource.GetRequest aboutUser = driveService.About.Get();
-        aboutUser.Fields = "kind,user,storageQuota";
-        Google.Apis.Drive.v3.Data.About userInfo = aboutUser.Execute();
+        Google.Apis.Drive.v3.Data.About userInfo = _googleOperations.GetUserInfo();
 
         HomeViewModel viewInfo = new HomeViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
-            uploadInfo = _liteDB.LastFiveUploads(),
-            recordCount = _liteDB.CountRecords()
+            UploadInfo = _liteDB.LastFiveUploads(),
+            RecordCount = _liteDB.CountRecords()
         };
 
         return View(viewInfo);

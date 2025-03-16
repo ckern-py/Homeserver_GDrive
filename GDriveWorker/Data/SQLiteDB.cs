@@ -79,7 +79,7 @@ namespace GDriveWorker.Data
         {
             SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=upload.db; Version = 3;");
             // Open the connection:
-            if(uploadDBSQLiteConn.State != System.Data.ConnectionState.Open)
+            if (uploadDBSQLiteConn.State != System.Data.ConnectionState.Open)
             {
                 try
                 {
