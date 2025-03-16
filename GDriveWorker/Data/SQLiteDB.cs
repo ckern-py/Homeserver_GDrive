@@ -77,7 +77,7 @@ namespace GDriveWorker.Data
 
         private static SQLiteConnection CreateConnection()
         {
-            SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=upload.db; Version = 3;");
+            SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=/../config/upload.db; Version = 3;");
             // Open the connection:
             if (uploadDBSQLiteConn.State != System.Data.ConnectionState.Open)
             {

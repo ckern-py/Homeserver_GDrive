@@ -13,7 +13,7 @@ namespace GDriveWorker.Data
         public Google.Apis.Drive.v3.Data.About GetUserInfo()
         {
             GoogleCredential credential;
-            using (FileStream stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+            using (FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
             }
