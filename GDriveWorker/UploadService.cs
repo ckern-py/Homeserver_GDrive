@@ -30,7 +30,7 @@ namespace GDriveWorker
                     //_logger.LogInformation("File_{num} Inserted at {dateTime}", num, insertDT);
                     string upload = _gDriveLogic.UploadFiles();
                 }
-                await Task.Delay(10000, stoppingToken);
+                await Task.Delay(1000000, stoppingToken);
             }
         }
     }

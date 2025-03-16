@@ -27,7 +27,13 @@ namespace GDriveWorker.Data
             folder.Q = $"name = '{folderName}' and mimeType = 'application/vnd.google-apps.folder'";
             Google.Apis.Drive.v3.Data.FileList foundFolder = folder.Execute();
 
-            return foundFolder.Files[0].Id;
+            string folderID = string.Empty;
+            if (!string.IsNullOrEmpty(foundFolder.Files[0].Id))
+            {
+                folderID = foundFolder.Files[0].Id;
+            }
+
+            return folderID;
         }
 
         public string CreatFolder(string folderID, string folderName)
@@ -50,7 +56,8 @@ namespace GDriveWorker.Data
         private static DriveService SALogin()
         {
             GoogleCredential credential;
-            using (FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read))
+            //FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read)
+            using (FileStream stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
             }

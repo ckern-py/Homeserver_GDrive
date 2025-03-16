@@ -21,8 +21,18 @@ namespace GDriveWorker.Data
 
         public string UploadFiles()
         {
-            string[] dir = Directory.GetDirectories("/../media/");
             string parentFolderID = _googleOperation.FindFolderID(gDriveUploadFolder);
+
+            if (string.IsNullOrEmpty(parentFolderID))
+            {
+                _logger.LogInformation("Could not find parent folder {parent}", gDriveUploadFolder);
+                return "";
+            }
+
+            string[] dir = Directory.GetDirectories("/../media/");
+            
+            //if folder not exist create, else skip
+
             
             return "OK";
         }

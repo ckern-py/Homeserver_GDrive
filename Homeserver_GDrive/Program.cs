@@ -15,7 +15,7 @@ namespace Homeserver_GDrive
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSingleton<ISQLiteDB, SQLiteDB>();
-            builder.Services.AddScoped<IGoogleOperations, GoogleOperations>();
+            builder.Services.AddSingleton<IGoogleOperations, GoogleOperations>();
             builder.Services.AddTransient<IGDriveLogic, GDriveLogic>();
             //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 10000, sp.GetService<ISQLiteDB>()));
             //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 5000));
