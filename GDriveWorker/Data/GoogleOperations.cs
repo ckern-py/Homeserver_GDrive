@@ -28,9 +28,10 @@ namespace GDriveWorker.Data
             Google.Apis.Drive.v3.Data.FileList foundFolder = folder.Execute();
 
             string folderID = string.Empty;
-            if (!string.IsNullOrEmpty(foundFolder.Files[0].Id))
+            Google.Apis.Drive.v3.Data.File? firstFolder = foundFolder.Files.FirstOrDefault();
+            if (firstFolder is not null)
             {
-                folderID = foundFolder.Files[0].Id;
+                folderID = firstFolder.Id;
             }
 
             return folderID;

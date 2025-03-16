@@ -13,6 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Homeserver_GDrive/Homeserver_GDrive.csproj", "Homeserver_GDrive/"]
+COPY ["Homeserver_GDrive/GDriveWorker.csproj", "GDriveWorker/"]
 RUN dotnet restore "./Homeserver_GDrive/Homeserver_GDrive.csproj"
 COPY . .
 WORKDIR "/src/Homeserver_GDrive"
