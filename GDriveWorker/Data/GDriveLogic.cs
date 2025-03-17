@@ -14,7 +14,7 @@ namespace GDriveWorker.Data
             _googleOperation = googleOperations;
         }
 
-        public string UploadFiles(string location)
+        public string UploadMediaDirectory(string location)
         {
             string parentFolderID = _googleOperation.FindFolderID(gDriveUploadFolder);
 
@@ -27,7 +27,18 @@ namespace GDriveWorker.Data
             string[] files = Directory.GetFiles(location);
             foreach (string file in files)
             {
-                string fileStatus = _googleOperation.UploadFile(file, parentFolderID);
+                //does file exist? if so update else upload
+                string fileStatus = string.Empty;
+                string fileID = _googleOperation.FindFileID(file, parentFolderID);
+                if (string.IsNullOrWhiteSpace(fileID))
+                {
+                    fileStatus = _googleOperation.UploadFile(file, parentFolderID);
+                }
+                else
+                {
+                    fileStatus = _googleOperation.UpdateFile(file, parentFolderID, fileID);
+                }
+                    
             };
 
             string[] dir = Directory.GetDirectories(location);

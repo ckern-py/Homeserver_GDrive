@@ -38,6 +38,24 @@ namespace GDriveWorker.Data
             return folderID;
         }
 
+        public string FindFileID(string fileName, string parentID)
+        {
+            DriveService driveService = SALogin();
+
+            FilesResource.ListRequest file = driveService.Files.List();
+            file.Q = $"name = '{fileName}' and mimeType != 'application/vnd.google-apps.folder' and '{parentID}' in parents";
+            Google.Apis.Drive.v3.Data.FileList foundFile = file.Execute();
+
+            string fileID = string.Empty;
+            Google.Apis.Drive.v3.Data.File? firstFile = foundFile.Files.FirstOrDefault();
+            if (firstFile is not null)
+            {
+                fileID = firstFile.Id;
+            }
+
+            return fileID;
+        }
+
         public string CreateFolder(string folderID, string folderName)
         {
             DriveService driveService = SALogin();
@@ -55,7 +73,7 @@ namespace GDriveWorker.Data
             return folder.Id;
         }
 
-        public string UploadFile(string fileLocation, string parent = "")
+        public string UploadFile(string fileLocation, string parent)
         {
             DriveService driveService = SALogin();
 
@@ -66,17 +84,35 @@ namespace GDriveWorker.Data
                 Google.Apis.Drive.v3.Data.File driveFile = new Google.Apis.Drive.v3.Data.File
                 {
                     Name = Path.GetFileName(fileLocation),
-                    MimeType = "application/vnd.google-apps.document"
+                    MimeType = "application/vnd.google-apps.document",
+                    Parents = new List<string>() { parent }
                 };
-
-                if (!string.IsNullOrWhiteSpace(parent))
-                {
-                    driveFile.Parents = new List<string>() { parent };
-                }
 
                 FilesResource.CreateMediaUpload uploadRequest = driveService.Files.Create(driveFile, uploadStream, "text/plain");
 
                 uploadProgress = uploadRequest.Upload();
+            }
+            return uploadProgress.Status.ToString();
+        }
+
+        public string UpdateFile(string fileLocation, string parent, string fileID)
+        {
+            DriveService driveService = SALogin();
+
+            IUploadProgress uploadProgress;
+
+            using (FileStream uploadStream = File.OpenRead(fileLocation))
+            {
+                Google.Apis.Drive.v3.Data.File driveFile = new Google.Apis.Drive.v3.Data.File
+                {
+                    Name = Path.GetFileName(fileLocation),
+                    MimeType = "application/vnd.google-apps.document",
+                    Parents = new List<string>() { parent }
+                };
+
+                FilesResource.UpdateMediaUpload updateRequest = driveService.Files.Update(driveFile, fileID, uploadStream, "text/plain");
+
+                uploadProgress = updateRequest.Upload();
             }
             return uploadProgress.Status.ToString();
         }
