@@ -20,12 +20,30 @@ namespace GDriveWorker.Data
             return aboutUser.Execute();
         }
 
-        public string FindFolderID(string folderName)
+        public string FindFirstFolderID(string folderName)
         {
             DriveService driveService = SALogin();
 
             FilesResource.ListRequest folder = driveService.Files.List();
             folder.Q = $"name = '{folderName}' and mimeType = 'application/vnd.google-apps.folder'";
+            Google.Apis.Drive.v3.Data.FileList foundFolder = folder.Execute();
+
+            string folderID = string.Empty;
+            Google.Apis.Drive.v3.Data.File? firstFolder = foundFolder.Files.FirstOrDefault();
+            if (firstFolder is not null)
+            {
+                folderID = firstFolder.Id;
+            }
+
+            return folderID;
+        }
+
+        public string FindFolderID(string folderName, string parentID)
+        {
+            DriveService driveService = SALogin();
+
+            FilesResource.ListRequest folder = driveService.Files.List();
+            folder.Q = $"name = '{folderName}' and mimeType = 'application/vnd.google-apps.folder' and '{parentID}' in parents";
             Google.Apis.Drive.v3.Data.FileList foundFolder = folder.Execute();
 
             string folderID = string.Empty;
@@ -56,7 +74,7 @@ namespace GDriveWorker.Data
             return fileID;
         }
 
-        public string CreateFolder(string folderID, string folderName)
+        public string CreateFolder(string folderName, string parentID, string folderID = "")
         {
             DriveService driveService = SALogin();
 
@@ -64,9 +82,14 @@ namespace GDriveWorker.Data
             {
                 Kind = "drive#file",
                 MimeType = "application/vnd.google-apps.folder",
-                Id = folderID,
-                Name = folderName
+                Name = folderName,
+                Parents = new List<string>() { parentID }
             };
+
+            if (!string.IsNullOrWhiteSpace(folderID))
+            {
+                newFolder.Id = folderID;
+            }
 
             FilesResource.CreateRequest createRequest = driveService.Files.Create(newFolder);
             Google.Apis.Drive.v3.Data.File folder = createRequest.Execute();
@@ -84,7 +107,6 @@ namespace GDriveWorker.Data
                 Google.Apis.Drive.v3.Data.File driveFile = new Google.Apis.Drive.v3.Data.File
                 {
                     Name = Path.GetFileName(fileLocation),
-                    MimeType = "application/vnd.google-apps.document",
                     Parents = new List<string>() { parent }
                 };
 
@@ -95,7 +117,7 @@ namespace GDriveWorker.Data
             return uploadProgress.Status.ToString();
         }
 
-        public string UpdateFile(string fileLocation, string parent, string fileID)
+        public string UpdateFile(string fileLocation, string fileID)
         {
             DriveService driveService = SALogin();
 
@@ -105,9 +127,7 @@ namespace GDriveWorker.Data
             {
                 Google.Apis.Drive.v3.Data.File driveFile = new Google.Apis.Drive.v3.Data.File
                 {
-                    Name = Path.GetFileName(fileLocation),
-                    MimeType = "application/vnd.google-apps.document",
-                    Parents = new List<string>() { parent }
+                    Name = Path.GetFileName(fileLocation)                    
                 };
 
                 FilesResource.UpdateMediaUpload updateRequest = driveService.Files.Update(driveFile, fileID, uploadStream, "text/plain");

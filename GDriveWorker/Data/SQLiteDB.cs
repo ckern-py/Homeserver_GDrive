@@ -10,11 +10,17 @@ namespace GDriveWorker.Data
         {
             SQLiteConnection localDBConn = CreateConnection();
 
-            SQLiteCommand newTableCmd;
-            string createTable = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
-            newTableCmd = localDBConn.CreateCommand();
-            newTableCmd.CommandText = createTable;
-            newTableCmd.ExecuteNonQuery();
+            SQLiteCommand fileUploadsTableCmd;
+            string uploadsTable = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
+            fileUploadsTableCmd = localDBConn.CreateCommand();
+            fileUploadsTableCmd.CommandText = uploadsTable;
+            fileUploadsTableCmd.ExecuteNonQuery();
+
+            SQLiteCommand errorTableCmd;
+            string errorTable = "CREATE TABLE IF NOT EXISTS [Errors](Error VARCHAR(500), ErrorDT VARCHAR(100))";
+            errorTableCmd = localDBConn.CreateCommand();
+            errorTableCmd.CommandText = errorTable;
+            errorTableCmd.ExecuteNonQuery();
         }
 
         public List<UploadInfo> LastFiveUploads()
@@ -79,7 +85,7 @@ namespace GDriveWorker.Data
         {
             //SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=/../config/upload.db; Version = 3;");
             SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=upload.db; Version = 3;");
-            // Open the connection:
+
             if (uploadDBSQLiteConn.State != System.Data.ConnectionState.Open)
             {
                 try
