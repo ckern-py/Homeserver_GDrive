@@ -42,7 +42,7 @@ namespace GDriveWorker.Data
             }
 
             string[] dir = Directory.GetDirectories(location);
-            
+
             foreach (string directory in dir)
             {
                 string justFolder = new DirectoryInfo(directory).Name;

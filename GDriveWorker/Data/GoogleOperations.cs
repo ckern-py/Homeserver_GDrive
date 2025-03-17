@@ -101,16 +101,18 @@ namespace GDriveWorker.Data
             DriveService driveService = SALogin();
 
             IUploadProgress uploadProgress;
+            string justFileName = Path.GetFileName(fileLocation);
 
             using (FileStream uploadStream = File.OpenRead(fileLocation))
             {
                 Google.Apis.Drive.v3.Data.File driveFile = new Google.Apis.Drive.v3.Data.File
                 {
-                    Name = Path.GetFileName(fileLocation),
+                    Name = justFileName,
                     Parents = new List<string>() { parent }
                 };
 
-                FilesResource.CreateMediaUpload uploadRequest = driveService.Files.Create(driveFile, uploadStream, "text/plain");
+                string contentType = GetMIMEType(Path.GetExtension(justFileName));
+                FilesResource.CreateMediaUpload uploadRequest = driveService.Files.Create(driveFile, uploadStream, contentType);
 
                 uploadProgress = uploadRequest.Upload();
             }
@@ -122,15 +124,17 @@ namespace GDriveWorker.Data
             DriveService driveService = SALogin();
 
             IUploadProgress uploadProgress;
+            string justFileName = Path.GetFileName(fileLocation);
 
             using (FileStream uploadStream = File.OpenRead(fileLocation))
             {
                 Google.Apis.Drive.v3.Data.File driveFile = new Google.Apis.Drive.v3.Data.File
                 {
-                    Name = Path.GetFileName(fileLocation)                    
+                    Name = justFileName
                 };
 
-                FilesResource.UpdateMediaUpload updateRequest = driveService.Files.Update(driveFile, fileID, uploadStream, "text/plain");
+                string contentType = GetMIMEType(Path.GetExtension(justFileName));
+                FilesResource.UpdateMediaUpload updateRequest = driveService.Files.Update(driveFile, fileID, uploadStream, contentType);
 
                 uploadProgress = updateRequest.Upload();
             }
@@ -153,6 +157,20 @@ namespace GDriveWorker.Data
             });
 
             return driveService;
+        }
+
+        private static string GetMIMEType(string fileExtension)
+        {
+            switch (fileExtension)
+            {
+                case ".txt":
+                    return "text/plain";
+                case ".yml":
+                case ".yaml":
+                    return "application/yaml";
+                default:
+                    return "text/plain";
+            };
         }
     }
 }
