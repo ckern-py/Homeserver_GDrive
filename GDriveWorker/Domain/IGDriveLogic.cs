@@ -8,6 +8,6 @@ namespace GDriveWorker.Domain
 {
     public interface IGDriveLogic
     {
-        string UploadFiles();
+        string UploadFiles(string location);
     }
 }

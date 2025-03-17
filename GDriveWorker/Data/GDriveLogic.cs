@@ -1,9 +1,4 @@
 ﻿using GDriveWorker.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GDriveWorker.Data
 {
@@ -13,13 +8,13 @@ namespace GDriveWorker.Data
         private readonly IGoogleOperations _googleOperation;
         private readonly ILogger<GDriveLogic> _logger;
 
-        public GDriveLogic (ILogger<GDriveLogic> logger, IGoogleOperations googleOperations)
+        public GDriveLogic(ILogger<GDriveLogic> logger, IGoogleOperations googleOperations)
         {
             _logger = logger;
             _googleOperation = googleOperations;
         }
 
-        public string UploadFiles()
+        public string UploadFiles(string location)
         {
             string parentFolderID = _googleOperation.FindFolderID(gDriveUploadFolder);
 
@@ -29,11 +24,17 @@ namespace GDriveWorker.Data
                 return "";
             }
 
-            string[] dir = Directory.GetDirectories("/../media/");
-            
+            string[] files = Directory.GetFiles(location);
+            foreach (string file in files)
+            {
+                string fileStatus = _googleOperation.UploadFile(file, parentFolderID);
+            };
+
+            string[] dir = Directory.GetDirectories(location);
+
             //if folder not exist create, else skip
 
-            
+
             return "OK";
         }
     }

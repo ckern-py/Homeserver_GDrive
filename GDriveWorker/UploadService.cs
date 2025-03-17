@@ -28,7 +28,7 @@ namespace GDriveWorker
                     //string insertDT = DateTime.Now.ToString();
                     //_sqliteDB.InsertUploadRecord($"File_{num}", insertDT);
                     //_logger.LogInformation("File_{num} Inserted at {dateTime}", num, insertDT);
-                    string upload = _gDriveLogic.UploadFiles();
+                    string upload = _gDriveLogic.UploadFiles("/../media/");
                 }
                 await Task.Delay(1000000, stoppingToken);
             }

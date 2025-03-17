@@ -2,6 +2,7 @@
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+using Google.Apis.Upload;
 
 namespace GDriveWorker.Data
 {
@@ -37,7 +38,7 @@ namespace GDriveWorker.Data
             return folderID;
         }
 
-        public string CreatFolder(string folderID, string folderName)
+        public string CreateFolder(string folderID, string folderName)
         {
             DriveService driveService = SALogin();
 
@@ -52,6 +53,32 @@ namespace GDriveWorker.Data
             FilesResource.CreateRequest createRequest = driveService.Files.Create(newFolder);
             Google.Apis.Drive.v3.Data.File folder = createRequest.Execute();
             return folder.Id;
+        }
+
+        public string UploadFile(string fileLocation, string parent = "")
+        {
+            DriveService driveService = SALogin();
+
+            IUploadProgress uploadProgress;
+
+            using (FileStream uploadStream = File.OpenRead(fileLocation))
+            {
+                Google.Apis.Drive.v3.Data.File driveFile = new Google.Apis.Drive.v3.Data.File
+                {
+                    Name = Path.GetFileName(fileLocation),
+                    MimeType = "application/vnd.google-apps.document"
+                };
+
+                if (!string.IsNullOrWhiteSpace(parent))
+                {
+                    driveFile.Parents = new List<string>() { parent };
+                }
+
+                FilesResource.CreateMediaUpload uploadRequest = driveService.Files.Create(driveFile, uploadStream, "text/plain");
+
+                uploadProgress = uploadRequest.Upload();
+            }
+            return uploadProgress.Status.ToString();
         }
 
         private static DriveService SALogin()
