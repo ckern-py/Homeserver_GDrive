@@ -4,7 +4,7 @@ namespace GDriveWorker.Data
 {
     public class GDriveLogic : IGDriveLogic
     {
-        private string gDriveUploadFolder = "HomeServer_GDrive";
+        private readonly string gDriveUploadFolder = "HomeServer_GDrive";
         private readonly IGoogleOperations _googleOperation;
         private readonly ILogger<GDriveLogic> _logger;
 
@@ -14,21 +14,28 @@ namespace GDriveWorker.Data
             _googleOperation = googleOperations;
         }
 
-        public string UploadMediaDirectory(string location)
+        public void UploadMediaDirectory(string location)
         {
             string parentFolderID = _googleOperation.FindFolderID(gDriveUploadFolder);
 
             if (string.IsNullOrWhiteSpace(parentFolderID))
             {
                 _logger.LogInformation("Could not find parent folder {parent}", gDriveUploadFolder);
-                return "";
+                return;
             }
 
+            UploadFiles(location, parentFolderID);
+
+            UploadFolder(location, parentFolderID);
+        }
+
+        private void UploadFiles(string location, string parentFolderID)
+        {
             string[] files = Directory.GetFiles(location);
             foreach (string file in files)
             {
-                //does file exist? if so update else upload
                 //TODO:add errors to error table
+                //TODO:add success to upload table
                 string fileStatus = string.Empty;
                 string fileID = _googleOperation.FindFileID(Path.GetFileName(file), parentFolderID);
                 if (string.IsNullOrWhiteSpace(fileID))
@@ -40,22 +47,25 @@ namespace GDriveWorker.Data
                     fileStatus = _googleOperation.UpdateFile(file, fileID);
                 }
             }
+        }
 
+        private void UploadFolder(string location, string parentFolderID)
+        {
             string[] dir = Directory.GetDirectories(location);
-
+            //TODO:add errors to error table
+            //TODO:add success to upload table
             foreach (string directory in dir)
             {
                 string justFolder = new DirectoryInfo(directory).Name;
                 string folderID = _googleOperation.FindFolderID(justFolder, parentFolderID);
                 if (string.IsNullOrWhiteSpace(folderID))
                 {
-                    _googleOperation.CreateFolder(justFolder, parentFolderID);
+                    folderID = _googleOperation.CreateFolder(justFolder, parentFolderID);
                 }
+
+                UploadFiles(directory, folderID);
+                UploadFolder(directory, folderID);
             }
-
-            //if folder not exist create, else skip
-
-            return "OK";
         }
     }
 }

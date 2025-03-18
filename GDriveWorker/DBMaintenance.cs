@@ -17,12 +17,12 @@ namespace GDriveWorker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                int delCount = _sqliteDB.DeleteOldRecords();
                 if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    int delCount = _sqliteDB.DeleteOldRecords();
+                {                    
                     _logger.LogInformation("Removed {delCount} Records at {datetime}", delCount, DateTime.Now);
                 }
-                await Task.Delay(5000, stoppingToken);
+                await Task.Delay(60000, stoppingToken);
             }
         }
     }

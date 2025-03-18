@@ -24,12 +24,10 @@ namespace GDriveWorker
             {
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    //int num = rand.Next(100);
-                    //string insertDT = DateTime.Now.ToString();
-                    //_sqliteDB.InsertUploadRecord($"File_{num}", insertDT);
-                    //_logger.LogInformation("File_{num} Inserted at {dateTime}", num, insertDT);
-                    string upload = _gDriveLogic.UploadMediaDirectory("/../media/");
+                    _logger.LogInformation("Running UploadService at {dateTime}", DateTime.Now);                   
                 }
+                Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/"));
+
                 await Task.Delay(1000000, stoppingToken);
             }
         }
