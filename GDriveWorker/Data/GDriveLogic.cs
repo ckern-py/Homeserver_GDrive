@@ -16,7 +16,7 @@ namespace GDriveWorker.Data
 
         public string UploadMediaDirectory(string location)
         {
-            string parentFolderID = _googleOperation.FindFirstFolderID(gDriveUploadFolder);
+            string parentFolderID = _googleOperation.FindFolderID(gDriveUploadFolder);
 
             if (string.IsNullOrWhiteSpace(parentFolderID))
             {

@@ -3,8 +3,7 @@
     public interface IGoogleOperations
     {
         Google.Apis.Drive.v3.Data.About GetUserInfo();
-        string FindFirstFolderID(string folderName);
-        string FindFolderID(string folderName, string parentID);
+        string FindFolderID(string folderName, string parentID = "");
         string FindFileID(string fileName, string parentID);
         string CreateFolder(string folderName, string parentID, string folderID = "");
         string UploadFile(string fileLocation, string parent);

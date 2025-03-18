@@ -20,30 +20,16 @@ namespace GDriveWorker.Data
             return aboutUser.Execute();
         }
 
-        public string FindFirstFolderID(string folderName)
+        public string FindFolderID(string folderName, string parentID = "")
         {
             DriveService driveService = SALogin();
 
             FilesResource.ListRequest folder = driveService.Files.List();
             folder.Q = $"name = '{folderName}' and mimeType = 'application/vnd.google-apps.folder'";
-            Google.Apis.Drive.v3.Data.FileList foundFolder = folder.Execute();
-
-            string folderID = string.Empty;
-            Google.Apis.Drive.v3.Data.File? firstFolder = foundFolder.Files.FirstOrDefault();
-            if (firstFolder is not null)
+            if (!string.IsNullOrWhiteSpace(parentID))
             {
-                folderID = firstFolder.Id;
+                folder.Q += $" and '{parentID}' in parents";
             }
-
-            return folderID;
-        }
-
-        public string FindFolderID(string folderName, string parentID)
-        {
-            DriveService driveService = SALogin();
-
-            FilesResource.ListRequest folder = driveService.Files.List();
-            folder.Q = $"name = '{folderName}' and mimeType = 'application/vnd.google-apps.folder' and '{parentID}' in parents";
             Google.Apis.Drive.v3.Data.FileList foundFolder = folder.Execute();
 
             string folderID = string.Empty;
@@ -169,7 +155,7 @@ namespace GDriveWorker.Data
                 case ".yaml":
                     return "application/yaml";
                 default:
-                    return "text/plain";
+                    return "application/octet-stream";
             };
         }
     }
