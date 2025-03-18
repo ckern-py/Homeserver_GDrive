@@ -10,17 +10,17 @@ namespace GDriveWorker.Data
         {
             SQLiteConnection localDBConn = CreateConnection();
 
-            SQLiteCommand fileUploadsTableCmd;
-            string uploadsTable = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
-            fileUploadsTableCmd = localDBConn.CreateCommand();
-            fileUploadsTableCmd.CommandText = uploadsTable;
-            fileUploadsTableCmd.ExecuteNonQuery();
+            SQLiteCommand uploadsTableCmd = localDBConn.CreateCommand();
+            uploadsTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
+            uploadsTableCmd.ExecuteNonQuery();
 
-            SQLiteCommand errorTableCmd;
-            string errorTable = "CREATE TABLE IF NOT EXISTS [Errors](Error VARCHAR(500), ErrorDT VARCHAR(100))";
-            errorTableCmd = localDBConn.CreateCommand();
-            errorTableCmd.CommandText = errorTable;
+            SQLiteCommand errorTableCmd = localDBConn.CreateCommand();
+            errorTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Errors](Error VARCHAR(500), ErrorDT VARCHAR(100))";
             errorTableCmd.ExecuteNonQuery();
+
+            SQLiteCommand infoTableCmd = localDBConn.CreateCommand();
+            infoTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Information](InfoMessage VARCHAR(500), InfoDT VARCHAR(100))";
+            infoTableCmd.ExecuteNonQuery();
         }
 
         public List<UploadInfo> LastFiveUploads()
@@ -30,7 +30,7 @@ namespace GDriveWorker.Data
             SQLiteConnection lastFiveConn = CreateConnection();
 
             SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = "SELECT * FROM FileUploads ORDER BY UploadDT DESC LIMIT 5";
+            lastFiveCmd.CommandText = "SELECT * FROM [FileUploads] ORDER BY UploadDT DESC LIMIT 5";
 
             SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
             while (sqliteDatareader.Read())
@@ -58,7 +58,7 @@ namespace GDriveWorker.Data
             return records;
         }
 
-        public int DeleteOldRecords()
+        public int DeleteOldFileUploadsRecords()
         {
             SQLiteConnection newDeleteConn = CreateConnection();
 
@@ -67,7 +67,28 @@ namespace GDriveWorker.Data
             int records = deleteComand.ExecuteNonQuery();
             newDeleteConn.Close();
             return records;
+        }
 
+        public int DeleteOldInformationRecords()
+        {
+            SQLiteConnection newDeleteConn = CreateConnection();
+
+            SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
+            deleteComand.CommandText = $"DELETE FROM [Information] WHERE InfoDT NOT IN (SELECT InfoDT FROM [Information] ORDER BY InfoDT DESC LIMIT 50)";
+            int records = deleteComand.ExecuteNonQuery();
+            newDeleteConn.Close();
+            return records;
+        }
+
+        public int DeleteOldErrorsRecords()
+        {
+            SQLiteConnection newDeleteConn = CreateConnection();
+
+            SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
+            deleteComand.CommandText = $"DELETE FROM [Errors] WHERE ErrorDT NOT IN (SELECT ErrorDT FROM [Errors] ORDER BY ErrorDT DESC LIMIT 50)";
+            int records = deleteComand.ExecuteNonQuery();
+            newDeleteConn.Close();
+            return records;
         }
 
         public int CountRecords()
@@ -75,7 +96,7 @@ namespace GDriveWorker.Data
             SQLiteConnection newCountConn = CreateConnection();
 
             SQLiteCommand countComand = newCountConn.CreateCommand();
-            countComand.CommandText = $"SELECT COUNT(*) FROM FileUploads";
+            countComand.CommandText = $"SELECT COUNT(*) FROM [FileUploads]";
             int records = Convert.ToInt32(countComand.ExecuteScalar());
             newCountConn.Close();
             return records;

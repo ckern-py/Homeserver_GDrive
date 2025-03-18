@@ -17,10 +17,14 @@ namespace GDriveWorker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                int delCount = _sqliteDB.DeleteOldRecords();
+                int delUploadCount = _sqliteDB.DeleteOldFileUploadsRecords();
+                int delInfoCount = _sqliteDB.DeleteOldInformationRecords();
+                int delErrorCount = _sqliteDB.DeleteOldErrorsRecords();
                 if (_logger.IsEnabled(LogLevel.Information))
                 {                    
-                    _logger.LogInformation("Removed {delCount} Records at {datetime}", delCount, DateTime.Now);
+                    _logger.LogInformation("Removed {delUploadCount} records from [FileUploads] at {datetime}", delUploadCount, DateTime.Now);
+                    _logger.LogInformation("Removed {delInfoCount} records from [Information] at {datetime}", delInfoCount, DateTime.Now);
+                    _logger.LogInformation("Removed {delErrorCount} records from [Errors] at {datetime}", delErrorCount, DateTime.Now);
                 }
                 await Task.Delay(60000, stoppingToken);
             }
