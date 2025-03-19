@@ -17,6 +17,12 @@ namespace GDriveWorker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("Running DBMaintenance at {dateTime}", DateTime.Now);
+                }
+                _sqliteDB.InsertInformationdRecord($"Running DBMaintenance", DateTime.Now.ToString());
+
                 int delUploadCount = _sqliteDB.DeleteOldFileUploadsRecords();
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
@@ -35,6 +41,12 @@ namespace GDriveWorker
                     _logger.LogInformation("Removed {delErrorCount} records from [Errors] at {datetime}", delErrorCount, DateTime.Now);
                 }
 
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("DBMaintenance finished {dateTime}", DateTime.Now);
+                }
+                _sqliteDB.InsertInformationdRecord($"DBMaintenance finished", DateTime.Now.ToString());
+                
                 await Task.Delay(60000, stoppingToken);
             }
         }

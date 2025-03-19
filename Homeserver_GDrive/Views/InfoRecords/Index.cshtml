@@ -1,0 +1,36 @@
+﻿@using GDriveWorker.Metadata
+@model InfoRecordsViewModel
+@{
+    ViewData["Title"] = "Info Records";
+}
+
+<div class="text-center">
+    <h2 class="display-4">Running service as:</h2>
+
+    <b>@Model.ServiceAccountName</b>
+</div>
+
+<body>
+    <div class="text-center">
+        <br />
+        Info Records: Showing 20 of @Model.InfoCount records
+        <br />
+    </div>
+    @foreach (BasicTableInfo uploadInfo in Model.InfoInfo)
+    {
+        <div class="container pt-2 w-100">
+            <div class="row ">
+                <div class="col-sm-4 w-50" style=" border: 1px solid;">
+                    <div>
+                        <b>FileName:</b> @uploadInfo.TableMessage
+                    </div>
+                </div>
+                <div class="col-sm-4 w-50" style=" border: 1px solid;">
+                    <div >
+                        <b>Upload Time:</b> @uploadInfo.MessageDT
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</body>

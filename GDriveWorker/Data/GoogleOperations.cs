@@ -156,7 +156,8 @@ namespace GDriveWorker.Data
                     return "application/yaml";
                 default:
                     return "application/octet-stream";
-            };
+            }
+            ;
         }
     }
 }
