@@ -145,8 +145,8 @@ namespace GDriveWorker.Data
         private DriveService SALogin()
         {
             GoogleCredential credential;
-            //FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read)
-            using (FileStream stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+            //FileStream stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read)
+            using (FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
             }

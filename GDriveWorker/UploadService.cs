@@ -28,8 +28,9 @@ namespace GDriveWorker
                 }
                 Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/"));
 
-                TimeSpan uploadServiceDelay = TimeSpan.FromHours(Convert.ToDouble(_configuration["AppSettings:UploadServiceDelayHours"]));
-                await Task.Delay(uploadServiceDelay, stoppingToken);
+                double delayHours = Convert.ToDouble(_configuration["AppSettings:UploadServiceDelayHours"]);
+                _sqliteDB.InsertInformationdRecord($"UploadService will execute again in {delayHours} hours", DateTime.Now.ToString());
+                await Task.Delay(TimeSpan.FromHours(delayHours), stoppingToken);
             }
         }
     }

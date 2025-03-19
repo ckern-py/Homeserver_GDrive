@@ -1,0 +1,16 @@
+services:
+  homeserver_gdrive:
+    image: ${DOCKER_REGISTRY-}homeservergdrive
+    build:
+      context: .
+      dockerfile: Homeserver_GDrive/Dockerfile
+    container_name: "MyHomeserverGDrive"
+    environment:
+        - AppSettings__DisplayName=My_Homeserver_GDrive
+        - AppSettings__DetailErrorRecordsCount=12
+        - AppSettings__DetailInfoRecordsCount=25
+        - AppSettings__DetailUploadRecordsCount=20
+    volumes:
+      - C:\Temp\config:/config
+      - C:\Temp\upload:/media
+  

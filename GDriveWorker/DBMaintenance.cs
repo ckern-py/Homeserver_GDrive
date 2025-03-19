@@ -26,18 +26,21 @@ namespace GDriveWorker
                 _sqliteDB.InsertInformationdRecord($"Running DBMaintenance", DateTime.Now.ToString());
 
                 int delUploadCount = _sqliteDB.DeleteOldFileUploadsRecords();
+                _sqliteDB.InsertInformationdRecord($"Removed {delUploadCount} records from [FileUploads]", DateTime.Now.ToString());
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     _logger.LogInformation("Removed {delUploadCount} records from [FileUploads] at {datetime}", delUploadCount, DateTime.Now);
                 }
 
                 int delInfoCount = _sqliteDB.DeleteOldInformationRecords();
+                _sqliteDB.InsertInformationdRecord($"Removed {delInfoCount} records from [Information]", DateTime.Now.ToString());
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     _logger.LogInformation("Removed {delInfoCount} records from [Information] at {datetime}", delInfoCount, DateTime.Now);
                 }
 
                 int delErrorCount = _sqliteDB.DeleteOldErrorsRecords();
+                _sqliteDB.InsertInformationdRecord($"Removed {delErrorCount} records from [Errors]", DateTime.Now.ToString());
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     _logger.LogInformation("Removed {delErrorCount} records from [Errors] at {datetime}", delErrorCount, DateTime.Now);
@@ -49,8 +52,9 @@ namespace GDriveWorker
                 }
                 _sqliteDB.InsertInformationdRecord($"DBMaintenance finished", DateTime.Now.ToString());
 
-                TimeSpan uploadServiceDelay = TimeSpan.FromHours(Convert.ToDouble(_configuration["AppSettings:DBMaintenanceDelayHours"]));
-                await Task.Delay(uploadServiceDelay, stoppingToken);
+                double delayHours = Convert.ToDouble(_configuration["AppSettings:DBMaintenanceDelayHours"]);
+                _sqliteDB.InsertInformationdRecord($"DBMaintenance will execute again in {delayHours} hours", DateTime.Now.ToString());
+                await Task.Delay(TimeSpan.FromHours(delayHours), stoppingToken);
             }
         }
     }
