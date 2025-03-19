@@ -3,6 +3,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Google.Apis.Upload;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GDriveWorker.Data
 {
@@ -10,14 +11,28 @@ namespace GDriveWorker.Data
     {
         private static readonly string[] Scopes = { DriveService.Scope.Drive };
         private static readonly string ApplicationName = "penthouse-gdrive";
+        private readonly IMemoryCache _memoryCache;
+
+        public GoogleOperations (IMemoryCache memoryCache)
+        {
+            _memoryCache = memoryCache;
+        }
+
 
         public Google.Apis.Drive.v3.Data.About GetUserInfo()
         {
-            DriveService driveService = SALogin();
+            if (!_memoryCache.TryGetValue("RUN_AS_USER", out Google.Apis.Drive.v3.Data.About userInfo))
+            {
+                DriveService driveService = SALogin();
 
-            AboutResource.GetRequest aboutUser = driveService.About.Get();
-            aboutUser.Fields = "kind,user,storageQuota";
-            return aboutUser.Execute();
+                AboutResource.GetRequest aboutUser = driveService.About.Get();
+                aboutUser.Fields = "kind,user,storageQuota";
+                userInfo = aboutUser.Execute();
+
+                _memoryCache.Set("RUN_AS_USER", userInfo, TimeSpan.FromDays(1));
+            }
+
+            return userInfo;
         }
 
         public string FindFolderID(string folderName, string parentID = "")
