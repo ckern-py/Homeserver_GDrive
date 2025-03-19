@@ -9,6 +9,9 @@ namespace Homeserver_GDrive
         public static void Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
 
             SQLiteDB.InitializeDB();
 
@@ -17,8 +20,6 @@ namespace Homeserver_GDrive
             builder.Services.AddSingleton<ISQLiteDB, SQLiteDB>();
             builder.Services.AddSingleton<IGoogleOperations, GoogleOperations>();
             builder.Services.AddTransient<IGDriveLogic, GDriveLogic>();
-            //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 10000, sp.GetService<ISQLiteDB>()));
-            //builder.Services.AddSingleton<IHostedService>(sp => new Worker(sp.GetService<ILogger<Worker>>(), 5000));
             builder.Services.AddHostedService<UploadService>();
             builder.Services.AddHostedService<DBMaintenance>();
 

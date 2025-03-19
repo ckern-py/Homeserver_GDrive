@@ -7,12 +7,14 @@ namespace GDriveWorker
         private readonly ILogger<UploadService> _logger;
         private readonly ISQLiteDB _sqliteDB;
         private readonly IGDriveLogic _gDriveLogic;
+        private readonly IConfiguration _configuration;
 
-        public UploadService(ILogger<UploadService> logger, ISQLiteDB sqLiteDB, IGDriveLogic gDriveLogic)
+        public UploadService(ILogger<UploadService> logger, ISQLiteDB sqLiteDB, IGDriveLogic gDriveLogic, IConfiguration configuration)
         {
             _logger = logger;
             _sqliteDB = sqLiteDB;
             _gDriveLogic = gDriveLogic;
+            _configuration = configuration;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -26,7 +28,8 @@ namespace GDriveWorker
                 }
                 Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/"));
 
-                await Task.Delay(1000000, stoppingToken);
+                TimeSpan uploadServiceDelay = TimeSpan.FromHours(Convert.ToDouble(_configuration["AppSettings:UploadServiceDelayHours"]));
+                await Task.Delay(uploadServiceDelay, stoppingToken);
             }
         }
     }

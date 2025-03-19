@@ -1,4 +1,5 @@
-﻿@using GDriveWorker.Metadata
+﻿@inject IConfiguration Configuration
+@using GDriveWorker.Metadata
 @model ErrorRecordsViewModel
 @{
     ViewData["Title"] = "Error Records";
@@ -13,7 +14,7 @@
 <body>
     <div class="text-center">
         <br />
-        Error Records: Showing 20 of @Model.ErrorCount records
+        <b>Error Records:</b> Showing @Configuration["AppSettings:DetailErrorRecordsCount"] of @Model.ErrorCount records
         <br />
     </div>
     @foreach (BasicTableInfo uploadInfo in Model.ErrorInfo)

@@ -6,11 +6,13 @@ namespace GDriveWorker
     {
         private readonly ILogger<DBMaintenance> _logger;
         private readonly ISQLiteDB _sqliteDB;
+        private readonly IConfiguration _configuration;
 
-        public DBMaintenance(ILogger<DBMaintenance> logger, ISQLiteDB sqLiteDB)
+        public DBMaintenance(ILogger<DBMaintenance> logger, ISQLiteDB sqLiteDB, IConfiguration configuration)
         {
             _logger = logger;
             _sqliteDB = sqLiteDB;
+            _configuration = configuration;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -47,7 +49,8 @@ namespace GDriveWorker
                 }
                 _sqliteDB.InsertInformationdRecord($"DBMaintenance finished", DateTime.Now.ToString());
 
-                await Task.Delay(60000, stoppingToken);
+                TimeSpan uploadServiceDelay = TimeSpan.FromHours(Convert.ToDouble(_configuration["AppSettings:DBMaintenanceDelayHours"]));
+                await Task.Delay(uploadServiceDelay, stoppingToken);
             }
         }
     }

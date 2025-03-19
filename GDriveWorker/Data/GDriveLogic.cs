@@ -5,26 +5,28 @@ namespace GDriveWorker.Data
 {
     public class GDriveLogic : IGDriveLogic
     {
-        private readonly string gDriveUploadFolder = "HomeServer_GDrive";
         private readonly IGoogleOperations _googleOperation;
         private readonly ILogger<GDriveLogic> _logger;
         private readonly ISQLiteDB _sqliteDB;
+        private readonly IConfiguration _configuration;
 
-        public GDriveLogic(ILogger<GDriveLogic> logger, IGoogleOperations googleOperations, ISQLiteDB sqliteDB)
+        public GDriveLogic(ILogger<GDriveLogic> logger, IGoogleOperations googleOperations, ISQLiteDB sqliteDB, IConfiguration configuration)
         {
             _logger = logger;
             _googleOperation = googleOperations;
             _sqliteDB = sqliteDB;
+            _configuration = configuration;
         }
 
         public void UploadMediaDirectory(string location)
         {
-            string parentFolderID = _googleOperation.FindFolderID(gDriveUploadFolder);
+            string topLevelFolder = _configuration["AppSettings:TopLevelGDriveFolder"];
+            string parentFolderID = _googleOperation.FindFolderID(topLevelFolder);
 
             if (string.IsNullOrWhiteSpace(parentFolderID))
             {
-                _logger.LogInformation("Could not find parent folder {parent}", gDriveUploadFolder);
-                _sqliteDB.InsertInformationdRecord($"Could not find parent folder {gDriveUploadFolder}", DateTime.Now.ToString());
+                _logger.LogInformation("Could not find parent folder {parent}", topLevelFolder);
+                _sqliteDB.InsertInformationdRecord($"Could not find parent folder {topLevelFolder}", DateTime.Now.ToString());
                 return;
             }
 

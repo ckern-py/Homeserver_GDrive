@@ -7,25 +7,26 @@ namespace Homeserver_GDrive.Controllers;
 
 public class InfoRecordsController : Controller
 {
-    private readonly ILogger<InfoRecordsController> _logger;
     private readonly ISQLiteDB _liteDB;
     private readonly IGoogleOperations _googleOperations;
+    private readonly IConfiguration _configuration;
 
-    public InfoRecordsController(ILogger<InfoRecordsController> logger, ISQLiteDB liteDB, IGoogleOperations googleOperations)
+    public InfoRecordsController(ISQLiteDB liteDB, IGoogleOperations googleOperations, IConfiguration configuration)
     {
-        _logger = logger;
         _liteDB = liteDB;
         _googleOperations = googleOperations;
+        _configuration = configuration;
     }
 
     public IActionResult Index()
     {
         Google.Apis.Drive.v3.Data.About userInfo = _googleOperations.GetUserInfo();
 
+        int infoRecordCount = Convert.ToInt32(_configuration["AppSettings:DetailInfoRecordsCount"]);
         InfoRecordsViewModel viewInfo = new InfoRecordsViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
-            InfoInfo = _liteDB.LastInformationRecords(20),
+            InfoInfo = _liteDB.LastInformationRecords(infoRecordCount),
             InfoCount = _liteDB.CountInfoRecords()
         };
 

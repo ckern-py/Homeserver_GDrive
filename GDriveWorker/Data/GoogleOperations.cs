@@ -10,12 +10,13 @@ namespace GDriveWorker.Data
     public class GoogleOperations : IGoogleOperations
     {
         private static readonly string[] Scopes = { DriveService.Scope.Drive };
-        private static readonly string ApplicationName = "penthouse-gdrive";
         private readonly IMemoryCache _memoryCache;
+        private readonly IConfiguration _configuration;
 
-        public GoogleOperations(IMemoryCache memoryCache)
+        public GoogleOperations(IMemoryCache memoryCache, IConfiguration configuration)
         {
             _memoryCache = memoryCache;
+            _configuration = configuration;
         }
 
         public Google.Apis.Drive.v3.Data.About GetUserInfo()
@@ -141,7 +142,7 @@ namespace GDriveWorker.Data
             return uploadProgress;
         }
 
-        private static DriveService SALogin()
+        private DriveService SALogin()
         {
             GoogleCredential credential;
             //FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read)
@@ -153,7 +154,7 @@ namespace GDriveWorker.Data
             DriveService driveService = new DriveService(new BaseClientService.Initializer
             {
                 HttpClientInitializer = credential,
-                ApplicationName = ApplicationName
+                ApplicationName = _configuration["AppSettings:GoogleApplicationName"]
             });
 
             return driveService;

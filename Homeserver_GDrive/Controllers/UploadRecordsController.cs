@@ -7,25 +7,26 @@ namespace Homeserver_GDrive.Controllers;
 
 public class UploadRecordsController : Controller
 {
-    private readonly ILogger<UploadRecordsController> _logger;
     private readonly ISQLiteDB _liteDB;
     private readonly IGoogleOperations _googleOperations;
+    private readonly IConfiguration _configuration;
 
-    public UploadRecordsController(ILogger<UploadRecordsController> logger, ISQLiteDB liteDB, IGoogleOperations googleOperations)
+    public UploadRecordsController(ISQLiteDB liteDB, IGoogleOperations googleOperations, IConfiguration configuration)
     {
-        _logger = logger;
         _liteDB = liteDB;
         _googleOperations = googleOperations;
+        _configuration = configuration;
     }
 
     public IActionResult Index()
     {
         Google.Apis.Drive.v3.Data.About userInfo = _googleOperations.GetUserInfo();
 
+        int uploadRecordCount = Convert.ToInt32(_configuration["AppSettings:DetailUploadRecordsCount"]);
         UploadrRecordsViewModel viewInfo = new UploadrRecordsViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
-            UploadInfo = _liteDB.LastUploadRecords(20),
+            UploadInfo = _liteDB.LastUploadRecords(uploadRecordCount),
             UploadCount = _liteDB.CountUploadRecords()
         };
 

@@ -1,4 +1,5 @@
-﻿@using GDriveWorker.Metadata
+﻿@inject IConfiguration Configuration
+@using GDriveWorker.Metadata
 @model UploadrRecordsViewModel
 @{
     ViewData["Title"] = "Upload Records";
@@ -13,7 +14,7 @@
 <body>
     <div class="text-center">
         <br />
-        Upload Records: Showing 20 of @Model.UploadCount records
+        <b>Upload Records:</b> Showing @Configuration["AppSettings:DetailUploadRecordsCount"] of @Model.UploadCount records
         <br />
     </div>
     @foreach (BasicTableInfo uploadInfo in Model.UploadInfo)

@@ -13,7 +13,7 @@
 <body>
     <div class="text-center">
         <br />
-        Upload Records: Showing 5 of @Model.UploadCount records
+        <b>Upload Records:</b> Showing 5 of @Model.UploadCount records
         <br />
     </div>
     @foreach (BasicTableInfo uploadInfo in Model.UploadInfo)
@@ -36,7 +36,7 @@
 
     <div class="text-center">
         <br />
-        Info Records: Showing 5 of @Model.InfoCount records
+        <b>Info Records:</b> Showing 5 of @Model.InfoCount records
         <br />
     </div>
     @foreach (BasicTableInfo uploadInfo in Model.InfoInfo)
@@ -59,7 +59,7 @@
 
     <div class="text-center">
         <br />
-        Error Records: Showing 5 of @Model.ErrorCount records
+        <b>Error Records:</b> Showing 5 of @Model.ErrorCount records
         <br />
     </div>
     @foreach (BasicTableInfo uploadInfo in Model.ErrorInfo)

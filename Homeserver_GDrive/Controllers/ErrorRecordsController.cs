@@ -7,25 +7,26 @@ namespace Homeserver_GDrive.Controllers;
 
 public class ErrorRecordsController : Controller
 {
-    private readonly ILogger<ErrorRecordsController> _logger;
     private readonly ISQLiteDB _liteDB;
     private readonly IGoogleOperations _googleOperations;
+    private readonly IConfiguration _configuration;
 
-    public ErrorRecordsController(ILogger<ErrorRecordsController> logger, ISQLiteDB liteDB, IGoogleOperations googleOperations)
+    public ErrorRecordsController(ISQLiteDB liteDB, IGoogleOperations googleOperations, IConfiguration configuration)
     {
-        _logger = logger;
         _liteDB = liteDB;
         _googleOperations = googleOperations;
+        _configuration = configuration;
     }
 
     public IActionResult Index()
     {
         Google.Apis.Drive.v3.Data.About userInfo = _googleOperations.GetUserInfo();
 
+        int errorRecordCount = Convert.ToInt32(_configuration["AppSettings:DetailErrorRecordsCount"]);
         ErrorRecordsViewModel viewInfo = new ErrorRecordsViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
-            ErrorInfo = _liteDB.LastErrorRecords(20),
+            ErrorInfo = _liteDB.LastErrorRecords(errorRecordCount),
             ErrorCount = _liteDB.CountErrorRecords()
         };
 
