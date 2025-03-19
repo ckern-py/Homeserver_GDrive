@@ -16,18 +16,18 @@
 </div>
 
 <body>
-    @foreach (UploadInfo uploadInfo in Model.UploadInfo)
+    @foreach (BasicTableInfo uploadInfo in Model.UploadInfo)
     {
         <div class="container pt-2 w-100">
             <div class="row ">
                 <div class="col-sm-4 w-50" style=" border: 1px solid;">
                     <div>
-                        <b>FileName:</b> @uploadInfo.FileName
+                        <b>FileName:</b> @uploadInfo.TableMessage
                     </div>
                 </div>
                 <div class="col-sm-4 w-50" style=" border: 1px solid;">
                     <div >
-                        <b>Upload Time:</b> @uploadInfo.UploadDT
+                        <b>Upload Time:</b> @uploadInfo.MessageDT
                     </div>
                 </div>
             </div>

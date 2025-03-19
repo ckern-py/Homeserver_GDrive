@@ -1,4 +1,5 @@
 ﻿using GDriveWorker.Domain;
+using Google.Apis.Upload;
 
 namespace GDriveWorker.Data
 {
@@ -7,11 +8,13 @@ namespace GDriveWorker.Data
         private readonly string gDriveUploadFolder = "HomeServer_GDrive";
         private readonly IGoogleOperations _googleOperation;
         private readonly ILogger<GDriveLogic> _logger;
+        private readonly ISQLiteDB _sqliteDB;
 
-        public GDriveLogic(ILogger<GDriveLogic> logger, IGoogleOperations googleOperations)
+        public GDriveLogic(ILogger<GDriveLogic> logger, IGoogleOperations googleOperations, ISQLiteDB sqliteDB)
         {
             _logger = logger;
             _googleOperation = googleOperations;
+            _sqliteDB = sqliteDB;
         }
 
         public void UploadMediaDirectory(string location)
@@ -21,6 +24,7 @@ namespace GDriveWorker.Data
             if (string.IsNullOrWhiteSpace(parentFolderID))
             {
                 _logger.LogInformation("Could not find parent folder {parent}", gDriveUploadFolder);
+                _sqliteDB.InsertInformationdRecord($"Could not find parent folder {gDriveUploadFolder}", DateTime.Now.ToString());
                 return;
             }
 
@@ -34,17 +38,26 @@ namespace GDriveWorker.Data
             string[] files = Directory.GetFiles(location);
             foreach (string file in files)
             {
-                //TODO:add errors to error table
-                //TODO:add success to upload table
-                string fileStatus = string.Empty;
+                IUploadProgress fileStatus;
                 string fileID = _googleOperation.FindFileID(Path.GetFileName(file), parentFolderID);
                 if (string.IsNullOrWhiteSpace(fileID))
                 {
+                    _sqliteDB.InsertInformationdRecord($"File {file} not found, uploading it", DateTime.Now.ToString());
                     fileStatus = _googleOperation.UploadFile(file, parentFolderID);
                 }
                 else
                 {
+                    _sqliteDB.InsertInformationdRecord($"File {file} found, updating it", DateTime.Now.ToString());
                     fileStatus = _googleOperation.UpdateFile(file, fileID);
+                }
+
+                if (fileStatus.Status == UploadStatus.Completed)
+                {
+                    _sqliteDB.InsertUploadRecord(file, DateTime.Now.ToString());
+                }
+                else
+                {
+                    _sqliteDB.InsertErrorRecord(fileStatus.Exception.ToString(), DateTime.Now.ToString());
                 }
             }
         }
@@ -52,15 +65,16 @@ namespace GDriveWorker.Data
         private void UploadFolder(string location, string parentFolderID)
         {
             string[] dir = Directory.GetDirectories(location);
-            //TODO:add errors to error table
-            //TODO:add success to upload table
+
             foreach (string directory in dir)
             {
                 string justFolder = new DirectoryInfo(directory).Name;
                 string folderID = _googleOperation.FindFolderID(justFolder, parentFolderID);
                 if (string.IsNullOrWhiteSpace(folderID))
                 {
+                    _sqliteDB.InsertInformationdRecord($"Folder {directory} not found, creating it", DateTime.Now.ToString());
                     folderID = _googleOperation.CreateFolder(justFolder, parentFolderID);
+                    _sqliteDB.InsertUploadRecord(directory, DateTime.Now.ToString());
                 }
 
                 UploadFiles(directory, folderID);

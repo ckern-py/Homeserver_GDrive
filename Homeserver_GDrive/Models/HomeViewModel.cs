@@ -6,6 +6,6 @@ namespace Homeserver_GDrive.Models
     {
         public string ServiceAccountName { get; set; } = "";
         public int RecordCount { get; set; } = 0;
-        public List<UploadInfo> UploadInfo { get; set; }
+        public List<BasicTableInfo> UploadInfo { get; set; }
     }
 }

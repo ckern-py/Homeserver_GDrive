@@ -82,7 +82,7 @@ namespace GDriveWorker.Data
             return folder.Id;
         }
 
-        public string UploadFile(string fileLocation, string parent)
+        public IUploadProgress UploadFile(string fileLocation, string parent)
         {
             DriveService driveService = SALogin();
 
@@ -102,10 +102,10 @@ namespace GDriveWorker.Data
 
                 uploadProgress = uploadRequest.Upload();
             }
-            return uploadProgress.Status.ToString();
+            return uploadProgress;
         }
 
-        public string UpdateFile(string fileLocation, string fileID)
+        public IUploadProgress UpdateFile(string fileLocation, string fileID)
         {
             DriveService driveService = SALogin();
 
@@ -124,7 +124,7 @@ namespace GDriveWorker.Data
 
                 uploadProgress = updateRequest.Upload();
             }
-            return uploadProgress.Status.ToString();
+            return uploadProgress;
         }
 
         private static DriveService SALogin()

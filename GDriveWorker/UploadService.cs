@@ -22,9 +22,16 @@ namespace GDriveWorker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                //int num = rand.Next(100);
+                //string insertDT = DateTime.Now.ToString();
+                //_sqliteDB.InsertUploadRecord($"File_{num}", insertDT);
+                //_logger.LogInformation("File_{num} Inserted at {dateTime}", num, insertDT);
+                //await Task.Delay(10000, stoppingToken);
+
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Running UploadService at {dateTime}", DateTime.Now);                   
+                    _logger.LogInformation("Running UploadService at {dateTime}", DateTime.Now);
+                    _sqliteDB.InsertInformationdRecord($"Running UploadService", DateTime.Now.ToString());
                 }
                 Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/"));
 

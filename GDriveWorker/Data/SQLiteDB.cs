@@ -23,22 +23,70 @@ namespace GDriveWorker.Data
             infoTableCmd.ExecuteNonQuery();
         }
 
-        public List<UploadInfo> LastFiveUploads()
+        public List<BasicTableInfo> LastFiveUploads()
         {
-            List<UploadInfo> fileList = new List<UploadInfo>();
+            List<BasicTableInfo> fileList = new List<BasicTableInfo>();
 
             SQLiteConnection lastFiveConn = CreateConnection();
 
             SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = "SELECT * FROM [FileUploads] ORDER BY UploadDT DESC LIMIT 5";
+            lastFiveCmd.CommandText = "SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT 5";
 
             SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
             while (sqliteDatareader.Read())
             {
-                UploadInfo info = new UploadInfo()
+                BasicTableInfo info = new BasicTableInfo()
                 {
-                    FileName = sqliteDatareader.GetString(0),
-                    UploadDT = sqliteDatareader.GetString(1)
+                    TableMessage = sqliteDatareader.GetString(0),
+                    MessageDT = sqliteDatareader.GetString(1)
+                };
+                fileList.Add(info);
+            }
+            lastFiveConn.Close();
+
+            return fileList;
+        }
+
+        public List<BasicTableInfo> LastFiveInformation()
+        {
+            List<BasicTableInfo> fileList = new List<BasicTableInfo>();
+
+            SQLiteConnection lastFiveConn = CreateConnection();
+
+            SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
+            lastFiveCmd.CommandText = "SELECT * FROM [Information] ORDER BY ROWID DESC LIMIT 5";
+
+            SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
+            while (sqliteDatareader.Read())
+            {
+                BasicTableInfo info = new BasicTableInfo()
+                {
+                    TableMessage = sqliteDatareader.GetString(0),
+                    MessageDT = sqliteDatareader.GetString(1)
+                };
+                fileList.Add(info);
+            }
+            lastFiveConn.Close();
+
+            return fileList;
+        }
+
+        public List<BasicTableInfo> LastFiveErrors()
+        {
+            List<BasicTableInfo> fileList = new List<BasicTableInfo>();
+
+            SQLiteConnection lastFiveConn = CreateConnection();
+
+            SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
+            lastFiveCmd.CommandText = "SELECT * FROM [Errors] ORDER BY ROWID DESC LIMIT 5";
+
+            SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
+            while (sqliteDatareader.Read())
+            {
+                BasicTableInfo info = new BasicTableInfo()
+                {
+                    TableMessage = sqliteDatareader.GetString(0),
+                    MessageDT = sqliteDatareader.GetString(1)
                 };
                 fileList.Add(info);
             }
@@ -52,7 +100,29 @@ namespace GDriveWorker.Data
             SQLiteConnection newInsertConn = CreateConnection();
 
             SQLiteCommand insertComand = newInsertConn.CreateCommand();
-            insertComand.CommandText = $"INSERT INTO FileUploads(FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
+            insertComand.CommandText = $"INSERT INTO [FileUploads](FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
+            int records = insertComand.ExecuteNonQuery();
+            newInsertConn.Close();
+            return records;
+        }
+
+        public int InsertInformationdRecord(string infoMessage, string infoDT)
+        {
+            SQLiteConnection newInsertConn = CreateConnection();
+
+            SQLiteCommand insertComand = newInsertConn.CreateCommand();
+            insertComand.CommandText = $"INSERT INTO [Information](InfoMessage, InfoDT) VALUES('{infoMessage}','{infoDT}'); ";
+            int records = insertComand.ExecuteNonQuery();
+            newInsertConn.Close();
+            return records;
+        }
+
+        public int InsertErrorRecord(string errorMessage, string errorDT)
+        {
+            SQLiteConnection newInsertConn = CreateConnection();
+
+            SQLiteCommand insertComand = newInsertConn.CreateCommand();
+            insertComand.CommandText = $"INSERT INTO [Errors](Error, ErrorDT) VALUES('{errorMessage}','{errorDT}'); ";
             int records = insertComand.ExecuteNonQuery();
             newInsertConn.Close();
             return records;
@@ -63,7 +133,7 @@ namespace GDriveWorker.Data
             SQLiteConnection newDeleteConn = CreateConnection();
 
             SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-            deleteComand.CommandText = $"DELETE FROM FileUploads WHERE UploadDT NOT IN (SELECT UploadDT FROM FileUploads ORDER BY UploadDT DESC LIMIT 50)";
+            deleteComand.CommandText = $"DELETE FROM FileUploads WHERE ROWID NOT IN (SELECT ROWID FROM FileUploads ORDER BY ROWID DESC LIMIT 50)";
             int records = deleteComand.ExecuteNonQuery();
             newDeleteConn.Close();
             return records;
@@ -74,7 +144,7 @@ namespace GDriveWorker.Data
             SQLiteConnection newDeleteConn = CreateConnection();
 
             SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-            deleteComand.CommandText = $"DELETE FROM [Information] WHERE InfoDT NOT IN (SELECT InfoDT FROM [Information] ORDER BY InfoDT DESC LIMIT 50)";
+            deleteComand.CommandText = $"DELETE FROM [Information] WHERE ROWID NOT IN (SELECT ROWID FROM [Information] ORDER BY ROWID DESC LIMIT 50)";
             int records = deleteComand.ExecuteNonQuery();
             newDeleteConn.Close();
             return records;
@@ -85,7 +155,7 @@ namespace GDriveWorker.Data
             SQLiteConnection newDeleteConn = CreateConnection();
 
             SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-            deleteComand.CommandText = $"DELETE FROM [Errors] WHERE ErrorDT NOT IN (SELECT ErrorDT FROM [Errors] ORDER BY ErrorDT DESC LIMIT 50)";
+            deleteComand.CommandText = $"DELETE FROM [Errors] WHERE ROWID NOT IN (SELECT ROWID FROM [Errors] ORDER BY ROWID DESC LIMIT 50)";
             int records = deleteComand.ExecuteNonQuery();
             newDeleteConn.Close();
             return records;
