@@ -13,11 +13,10 @@ namespace GDriveWorker.Data
         private static readonly string ApplicationName = "penthouse-gdrive";
         private readonly IMemoryCache _memoryCache;
 
-        public GoogleOperations (IMemoryCache memoryCache)
+        public GoogleOperations(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
         }
-
 
         public Google.Apis.Drive.v3.Data.About GetUserInfo()
         {

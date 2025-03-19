@@ -46,7 +46,7 @@ namespace GDriveWorker
                     _logger.LogInformation("DBMaintenance finished {dateTime}", DateTime.Now);
                 }
                 _sqliteDB.InsertInformationdRecord($"DBMaintenance finished", DateTime.Now.ToString());
-                
+
                 await Task.Delay(60000, stoppingToken);
             }
         }

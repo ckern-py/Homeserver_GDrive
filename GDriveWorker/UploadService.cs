@@ -7,13 +7,11 @@ namespace GDriveWorker
         private readonly ILogger<UploadService> _logger;
         private readonly ISQLiteDB _sqliteDB;
         private readonly IGDriveLogic _gDriveLogic;
-        private readonly Random rand;
 
         public UploadService(ILogger<UploadService> logger, ISQLiteDB sqLiteDB, IGDriveLogic gDriveLogic)
         {
             _logger = logger;
             _sqliteDB = sqLiteDB;
-            rand = new Random();
             _gDriveLogic = gDriveLogic;
         }
 
@@ -21,16 +19,10 @@ namespace GDriveWorker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                //int num = rand.Next(100);
-                //string insertDT = DateTime.Now.ToString();
-                //_sqliteDB.InsertUploadRecord($"File_{num}", insertDT);
-                //_logger.LogInformation("File_{num} Inserted at {dateTime}", num, insertDT);
-                //await Task.Delay(100000, stoppingToken);
-
+                _sqliteDB.InsertInformationdRecord($"Running UploadService", DateTime.Now.ToString());
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     _logger.LogInformation("Running UploadService at {dateTime}", DateTime.Now);
-                    _sqliteDB.InsertInformationdRecord($"Running UploadService", DateTime.Now.ToString());
                 }
                 Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/"));
 
