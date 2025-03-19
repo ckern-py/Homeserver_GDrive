@@ -168,6 +168,8 @@ namespace GDriveWorker.Data
                 case ".yml":
                 case ".yaml":
                     return "application/yaml";
+                case ".sh":
+                    return "text/x-shellscript";
                 default:
                     return "application/octet-stream";
             }
