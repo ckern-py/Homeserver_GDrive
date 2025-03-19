@@ -25,8 +25,12 @@ public class HomeController : Controller
         HomeViewModel viewInfo = new HomeViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
-            UploadInfo = _liteDB.LastFiveUploads(),
-            RecordCount = _liteDB.CountRecords()
+            UploadInfo = _liteDB.LastUploadRecords(),
+            UploadCount = _liteDB.CountUploadRecords(),
+            InfoInfo = _liteDB.LastInformationRecords(),
+            InfoCount = _liteDB.CountInfoRecords(),
+            ErrorInfo = _liteDB.LastErrorRecords(),
+            ErrorCount = _liteDB.CountErrorRecords()
         };
 
         return View(viewInfo);

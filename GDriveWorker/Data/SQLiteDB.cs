@@ -23,14 +23,14 @@ namespace GDriveWorker.Data
             infoTableCmd.ExecuteNonQuery();
         }
 
-        public List<BasicTableInfo> LastFiveUploads()
+        public List<BasicTableInfo> LastUploadRecords(int uploadAmount = 5)
         {
             List<BasicTableInfo> fileList = new List<BasicTableInfo>();
 
             SQLiteConnection lastFiveConn = CreateConnection();
 
             SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = "SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT 5";
+            lastFiveCmd.CommandText = $"SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT {uploadAmount}";
 
             SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
             while (sqliteDatareader.Read())
@@ -47,14 +47,14 @@ namespace GDriveWorker.Data
             return fileList;
         }
 
-        public List<BasicTableInfo> LastFiveInformation()
+        public List<BasicTableInfo> LastInformationRecords(int infoAmount = 5)
         {
             List<BasicTableInfo> fileList = new List<BasicTableInfo>();
 
             SQLiteConnection lastFiveConn = CreateConnection();
 
             SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = "SELECT * FROM [Information] ORDER BY ROWID DESC LIMIT 5";
+            lastFiveCmd.CommandText = $"SELECT * FROM [Information] ORDER BY ROWID DESC LIMIT {infoAmount}";
 
             SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
             while (sqliteDatareader.Read())
@@ -71,14 +71,14 @@ namespace GDriveWorker.Data
             return fileList;
         }
 
-        public List<BasicTableInfo> LastFiveErrors()
+        public List<BasicTableInfo> LastErrorRecords(int errorAmount = 5)
         {
             List<BasicTableInfo> fileList = new List<BasicTableInfo>();
 
             SQLiteConnection lastFiveConn = CreateConnection();
 
             SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = "SELECT * FROM [Errors] ORDER BY ROWID DESC LIMIT 5";
+            lastFiveCmd.CommandText = $"SELECT * FROM [Errors] ORDER BY ROWID DESC LIMIT {errorAmount}";
 
             SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
             while (sqliteDatareader.Read())
@@ -161,12 +161,34 @@ namespace GDriveWorker.Data
             return records;
         }
 
-        public int CountRecords()
+        public int CountUploadRecords()
         {
             SQLiteConnection newCountConn = CreateConnection();
 
             SQLiteCommand countComand = newCountConn.CreateCommand();
             countComand.CommandText = $"SELECT COUNT(*) FROM [FileUploads]";
+            int records = Convert.ToInt32(countComand.ExecuteScalar());
+            newCountConn.Close();
+            return records;
+        }
+
+        public int CountInfoRecords()
+        {
+            SQLiteConnection newCountConn = CreateConnection();
+
+            SQLiteCommand countComand = newCountConn.CreateCommand();
+            countComand.CommandText = $"SELECT COUNT(*) FROM [Information]";
+            int records = Convert.ToInt32(countComand.ExecuteScalar());
+            newCountConn.Close();
+            return records;
+        }
+
+        public int CountErrorRecords()
+        {
+            SQLiteConnection newCountConn = CreateConnection();
+
+            SQLiteCommand countComand = newCountConn.CreateCommand();
+            countComand.CommandText = $"SELECT COUNT(*) FROM [Errors]";
             int records = Convert.ToInt32(countComand.ExecuteScalar());
             newCountConn.Close();
             return records;

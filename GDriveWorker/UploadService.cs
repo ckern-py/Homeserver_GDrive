@@ -7,7 +7,6 @@ namespace GDriveWorker
         private readonly ILogger<UploadService> _logger;
         private readonly ISQLiteDB _sqliteDB;
         private readonly IGDriveLogic _gDriveLogic;
-        private readonly int _delayTime = 15000;
         private readonly Random rand;
 
         public UploadService(ILogger<UploadService> logger, ISQLiteDB sqLiteDB, IGDriveLogic gDriveLogic)
@@ -26,7 +25,7 @@ namespace GDriveWorker
                 //string insertDT = DateTime.Now.ToString();
                 //_sqliteDB.InsertUploadRecord($"File_{num}", insertDT);
                 //_logger.LogInformation("File_{num} Inserted at {dateTime}", num, insertDT);
-                //await Task.Delay(10000, stoppingToken);
+                //await Task.Delay(100000, stoppingToken);
 
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
