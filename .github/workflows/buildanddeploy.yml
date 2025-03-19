@@ -9,22 +9,20 @@ jobs:
   NET-build:
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout API Code'
+    - name: 'Checkout Project Code'
       uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build
 
   Docker-deploy:
     needs: NET-build
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout API Code'
+    - name: 'Checkout Project Code'
       uses: actions/checkout@v4
     - name: Set timestamp for tag
       run: echo "TIME_TAG=$(date +%Y%m%d_%H%M%S)" >> "$GITHUB_ENV"
