@@ -6,212 +6,218 @@ namespace GDriveWorker.Data
 {
     public class SQLiteDB : ISQLiteDB
     {
+        private static readonly string _sqliteConnection = "Data Source=/../config/upload.db; Version = 3;";
+
         public static void InitializeDB()
         {
-            SQLiteConnection localDBConn = CreateConnection();
+            using (SQLiteConnection localDBConn = new SQLiteConnection(_sqliteConnection))
+            {
+                localDBConn.Open();
 
-            SQLiteCommand uploadsTableCmd = localDBConn.CreateCommand();
-            uploadsTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
-            uploadsTableCmd.ExecuteNonQuery();
+                SQLiteCommand uploadsTableCmd = localDBConn.CreateCommand();
+                uploadsTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
+                uploadsTableCmd.ExecuteNonQuery();
 
-            SQLiteCommand errorTableCmd = localDBConn.CreateCommand();
-            errorTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Errors](Error VARCHAR(500), ErrorDT VARCHAR(100))";
-            errorTableCmd.ExecuteNonQuery();
+                SQLiteCommand errorTableCmd = localDBConn.CreateCommand();
+                errorTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Errors](Error VARCHAR(500), ErrorDT VARCHAR(100))";
+                errorTableCmd.ExecuteNonQuery();
 
-            SQLiteCommand infoTableCmd = localDBConn.CreateCommand();
-            infoTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Information](InfoMessage VARCHAR(500), InfoDT VARCHAR(100))";
-            infoTableCmd.ExecuteNonQuery();
+                SQLiteCommand infoTableCmd = localDBConn.CreateCommand();
+                infoTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Information](InfoMessage VARCHAR(500), InfoDT VARCHAR(100))";
+                infoTableCmd.ExecuteNonQuery();
+            }
         }
 
         public List<BasicTableInfo> LastUploadRecords(int uploadAmount = 5)
         {
-            List<BasicTableInfo> fileList = new List<BasicTableInfo>();
-
-            SQLiteConnection lastFiveConn = CreateConnection();
-
-            SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = $"SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT {uploadAmount}";
-
-            SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
-            while (sqliteDatareader.Read())
+            using (SQLiteConnection lastUploadsConnection = new SQLiteConnection(_sqliteConnection))
             {
-                BasicTableInfo info = new BasicTableInfo()
-                {
-                    TableMessage = sqliteDatareader.GetString(0),
-                    MessageDT = sqliteDatareader.GetString(1)
-                };
-                fileList.Add(info);
-            }
-            lastFiveConn.Close();
+                lastUploadsConnection.Open();
 
-            return fileList;
+                SQLiteCommand lastFiveCmd = lastUploadsConnection.CreateCommand();
+                lastFiveCmd.CommandText = $"SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT {uploadAmount}";
+
+                SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
+                List<BasicTableInfo> fileList = new List<BasicTableInfo>();
+                while (sqliteDatareader.Read())
+                {
+                    BasicTableInfo info = new BasicTableInfo()
+                    {
+                        TableMessage = sqliteDatareader.GetString(0),
+                        MessageDT = sqliteDatareader.GetString(1)
+                    };
+                    fileList.Add(info);
+                }
+
+                return fileList;
+            }
         }
 
         public List<BasicTableInfo> LastInformationRecords(int infoAmount = 5)
         {
-            List<BasicTableInfo> fileList = new List<BasicTableInfo>();
-
-            SQLiteConnection lastFiveConn = CreateConnection();
-
-            SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = $"SELECT * FROM [Information] ORDER BY ROWID DESC LIMIT {infoAmount}";
-
-            SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
-            while (sqliteDatareader.Read())
+            using (SQLiteConnection lastInfoConnection = new SQLiteConnection(_sqliteConnection))
             {
-                BasicTableInfo info = new BasicTableInfo()
-                {
-                    TableMessage = sqliteDatareader.GetString(0),
-                    MessageDT = sqliteDatareader.GetString(1)
-                };
-                fileList.Add(info);
-            }
-            lastFiveConn.Close();
+                lastInfoConnection.Open();
 
-            return fileList;
+                SQLiteCommand lastFiveCmd = lastInfoConnection.CreateCommand();
+                lastFiveCmd.CommandText = $"SELECT * FROM [Information] ORDER BY ROWID DESC LIMIT {infoAmount}";
+
+                SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
+                List<BasicTableInfo> fileList = new List<BasicTableInfo>();
+                while (sqliteDatareader.Read())
+                {
+                    BasicTableInfo info = new BasicTableInfo()
+                    {
+                        TableMessage = sqliteDatareader.GetString(0),
+                        MessageDT = sqliteDatareader.GetString(1)
+                    };
+                    fileList.Add(info);
+                }
+
+                return fileList;
+            }
         }
 
         public List<BasicTableInfo> LastErrorRecords(int errorAmount = 5)
         {
-            List<BasicTableInfo> fileList = new List<BasicTableInfo>();
-
-            SQLiteConnection lastFiveConn = CreateConnection();
-
-            SQLiteCommand lastFiveCmd = lastFiveConn.CreateCommand();
-            lastFiveCmd.CommandText = $"SELECT * FROM [Errors] ORDER BY ROWID DESC LIMIT {errorAmount}";
-
-            SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
-            while (sqliteDatareader.Read())
+            using (SQLiteConnection lastErrorsConnection = new SQLiteConnection(_sqliteConnection))
             {
-                BasicTableInfo info = new BasicTableInfo()
-                {
-                    TableMessage = sqliteDatareader.GetString(0),
-                    MessageDT = sqliteDatareader.GetString(1)
-                };
-                fileList.Add(info);
-            }
-            lastFiveConn.Close();
+                lastErrorsConnection.Open();
 
-            return fileList;
+                SQLiteCommand lastFiveCmd = lastErrorsConnection.CreateCommand();
+                lastFiveCmd.CommandText = $"SELECT * FROM [Errors] ORDER BY ROWID DESC LIMIT {errorAmount}";
+
+                SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
+                List<BasicTableInfo> fileList = new List<BasicTableInfo>();
+                while (sqliteDatareader.Read())
+                {
+                    BasicTableInfo info = new BasicTableInfo()
+                    {
+                        TableMessage = sqliteDatareader.GetString(0),
+                        MessageDT = sqliteDatareader.GetString(1)
+                    };
+                    fileList.Add(info);
+                }
+
+                return fileList;
+            }
         }
 
         public int InsertUploadRecord(string fileName, string uploadDT)
         {
-            SQLiteConnection newInsertConn = CreateConnection();
+            using (SQLiteConnection newInsertConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newInsertConn.Open();
 
-            SQLiteCommand insertComand = newInsertConn.CreateCommand();
-            insertComand.CommandText = $"INSERT INTO [FileUploads](FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
-            int records = insertComand.ExecuteNonQuery();
-            newInsertConn.Close();
-            return records;
+                SQLiteCommand insertComand = newInsertConn.CreateCommand();
+                insertComand.CommandText = $"INSERT INTO [FileUploads](FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
+                int records = insertComand.ExecuteNonQuery();
+                return records;
+            }
         }
 
         public int InsertInformationdRecord(string infoMessage, string infoDT)
         {
-            SQLiteConnection newInsertConn = CreateConnection();
+            using (SQLiteConnection newInsertConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newInsertConn.Open();
 
-            SQLiteCommand insertComand = newInsertConn.CreateCommand();
-            insertComand.CommandText = $"INSERT INTO [Information](InfoMessage, InfoDT) VALUES('{infoMessage}','{infoDT}'); ";
-            int records = insertComand.ExecuteNonQuery();
-            newInsertConn.Close();
-            return records;
+                SQLiteCommand insertComand = newInsertConn.CreateCommand();
+                insertComand.CommandText = $"INSERT INTO [Information](InfoMessage, InfoDT) VALUES('{infoMessage}','{infoDT}'); ";
+                int records = insertComand.ExecuteNonQuery();
+                return records;
+            }
         }
 
         public int InsertErrorRecord(string errorMessage, string errorDT)
         {
-            SQLiteConnection newInsertConn = CreateConnection();
+            using (SQLiteConnection newInsertConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newInsertConn.Open();
 
-            SQLiteCommand insertComand = newInsertConn.CreateCommand();
-            insertComand.CommandText = $"INSERT INTO [Errors](Error, ErrorDT) VALUES('{errorMessage}','{errorDT}'); ";
-            int records = insertComand.ExecuteNonQuery();
-            newInsertConn.Close();
-            return records;
+                SQLiteCommand insertComand = newInsertConn.CreateCommand();
+                insertComand.CommandText = $"INSERT INTO [Errors](Error, ErrorDT) VALUES('{errorMessage}','{errorDT}'); ";
+                int records = insertComand.ExecuteNonQuery();
+                return records;
+            }
         }
 
         public int DeleteOldFileUploadsRecords()
         {
-            SQLiteConnection newDeleteConn = CreateConnection();
+            using (SQLiteConnection newDeleteConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newDeleteConn.Open();
 
-            SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-            deleteComand.CommandText = $"DELETE FROM FileUploads WHERE ROWID NOT IN (SELECT ROWID FROM FileUploads ORDER BY ROWID DESC LIMIT 50)";
-            int records = deleteComand.ExecuteNonQuery();
-            newDeleteConn.Close();
-            return records;
+                SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
+                deleteComand.CommandText = $"DELETE FROM FileUploads WHERE ROWID NOT IN (SELECT ROWID FROM FileUploads ORDER BY ROWID DESC LIMIT 50)";
+                int records = deleteComand.ExecuteNonQuery();
+                return records;
+            }
         }
 
         public int DeleteOldInformationRecords()
         {
-            SQLiteConnection newDeleteConn = CreateConnection();
+            using (SQLiteConnection newDeleteConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newDeleteConn.Open();
 
-            SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-            deleteComand.CommandText = $"DELETE FROM [Information] WHERE ROWID NOT IN (SELECT ROWID FROM [Information] ORDER BY ROWID DESC LIMIT 50)";
-            int records = deleteComand.ExecuteNonQuery();
-            newDeleteConn.Close();
-            return records;
+                SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
+                deleteComand.CommandText = $"DELETE FROM [Information] WHERE ROWID NOT IN (SELECT ROWID FROM [Information] ORDER BY ROWID DESC LIMIT 50)";
+                int records = deleteComand.ExecuteNonQuery();
+                return records;
+            }
         }
 
         public int DeleteOldErrorsRecords()
         {
-            SQLiteConnection newDeleteConn = CreateConnection();
+            using (SQLiteConnection newDeleteConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newDeleteConn.Open();
 
-            SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-            deleteComand.CommandText = $"DELETE FROM [Errors] WHERE ROWID NOT IN (SELECT ROWID FROM [Errors] ORDER BY ROWID DESC LIMIT 50)";
-            int records = deleteComand.ExecuteNonQuery();
-            newDeleteConn.Close();
-            return records;
+                SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
+                deleteComand.CommandText = $"DELETE FROM [Errors] WHERE ROWID NOT IN (SELECT ROWID FROM [Errors] ORDER BY ROWID DESC LIMIT 50)";
+                int records = deleteComand.ExecuteNonQuery();
+                return records;
+            }
         }
 
         public int CountUploadRecords()
         {
-            SQLiteConnection newCountConn = CreateConnection();
+            using (SQLiteConnection countUploadsConnection = new SQLiteConnection(_sqliteConnection))
+            {
+                countUploadsConnection.Open();
 
-            SQLiteCommand countComand = newCountConn.CreateCommand();
-            countComand.CommandText = $"SELECT COUNT(*) FROM [FileUploads]";
-            int records = Convert.ToInt32(countComand.ExecuteScalar());
-            newCountConn.Close();
-            return records;
+                SQLiteCommand countComand = countUploadsConnection.CreateCommand();
+                countComand.CommandText = $"SELECT COUNT(*) FROM [FileUploads]";
+                int records = Convert.ToInt32(countComand.ExecuteScalar());
+                return records;
+            }
         }
 
         public int CountInfoRecords()
         {
-            SQLiteConnection newCountConn = CreateConnection();
+            using (SQLiteConnection countInfoConnection = new SQLiteConnection(_sqliteConnection))
+            {
+                countInfoConnection.Open();
 
-            SQLiteCommand countComand = newCountConn.CreateCommand();
-            countComand.CommandText = $"SELECT COUNT(*) FROM [Information]";
-            int records = Convert.ToInt32(countComand.ExecuteScalar());
-            newCountConn.Close();
-            return records;
+                SQLiteCommand countComand = countInfoConnection.CreateCommand();
+                countComand.CommandText = $"SELECT COUNT(*) FROM [Information]";
+                int records = Convert.ToInt32(countComand.ExecuteScalar());
+                return records;
+            }
         }
 
         public int CountErrorRecords()
         {
-            SQLiteConnection newCountConn = CreateConnection();
-
-            SQLiteCommand countComand = newCountConn.CreateCommand();
-            countComand.CommandText = $"SELECT COUNT(*) FROM [Errors]";
-            int records = Convert.ToInt32(countComand.ExecuteScalar());
-            newCountConn.Close();
-            return records;
-        }
-
-        private static SQLiteConnection CreateConnection()
-        {
-            SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=/../config/upload.db; Version = 3;");
-            //SQLiteConnection uploadDBSQLiteConn = new SQLiteConnection("Data Source=upload.db; Version = 3;");
-
-            if (uploadDBSQLiteConn.State != System.Data.ConnectionState.Open)
+            using (SQLiteConnection countErrorsConnection = new SQLiteConnection(_sqliteConnection))
             {
-                try
-                {
-                    uploadDBSQLiteConn.Open();
-                }
-                catch (Exception ex)
-                {
+                countErrorsConnection.Open();
 
-                }
+                SQLiteCommand countComand = countErrorsConnection.CreateCommand();
+                countComand.CommandText = $"SELECT COUNT(*) FROM [Errors]";
+                int records = Convert.ToInt32(countComand.ExecuteScalar());
+                return records;
             }
-
-            return uploadDBSQLiteConn;
         }
     }
 }
