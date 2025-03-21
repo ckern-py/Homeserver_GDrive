@@ -33,7 +33,7 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build . -f Homeserver_GDrive/Dockerfile --tag ${{ secrets.REGISTRY_LOGIN_SERVER }}/docker_homeserver_gdrive:homeserver_gdrive_$TIME_TAG
+        docker build . -f Homeserver_GDrive/Dockerfile --tag ${{ secrets.REGISTRY_LOGIN_SERVER }}/docker_homeserver_gdrive:homeserver_gdrive_$TIME_TAG --tag ${{ secrets.REGISTRY_LOGIN_SERVER }}/docker_homeserver_gdrive:latest
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/docker_homeserver_gdrive:homeserver_gdrive_$TIME_TAG
 
     
