@@ -58,7 +58,7 @@ namespace GDriveWorker.Data
                         fileStatus = _googleOperation.UpdateFile(file, fileID);
                     }
                     else
-                    {                        
+                    {
                         _sqliteDB.InsertInformationdRecord($"File {file} has no changes, not updating", DateTime.Now.ToString());
                         continue;
                     }

@@ -6,4 +6,3 @@
         public string MessageDT { get; set; } = "";
     }
 }
-
