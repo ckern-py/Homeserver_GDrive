@@ -28,6 +28,26 @@ namespace GDriveWorker.Data
             }
         }
 
+        public DateTime GetFileUploadTime(string fileName)
+        {
+            using (SQLiteConnection fileUploadConnection = new SQLiteConnection(_sqliteConnection))
+            {
+                fileUploadConnection.Open();
+
+                SQLiteCommand lastUploadTime = fileUploadConnection.CreateCommand();
+                lastUploadTime.CommandText = $"SELECT UploadDT FROM [FileUploads] WHERE FileName = '{fileName}' ORDER BY ROWID DESC LIMIT 1";
+
+                SQLiteDataReader sqliteDatareader = lastUploadTime.ExecuteReader();
+                DateTime lastUpload = DateTime.MinValue;
+                while (sqliteDatareader.Read())
+                {
+                    lastUpload = Convert.ToDateTime(sqliteDatareader.GetString(0));
+                }
+
+                return lastUpload;
+            }
+        }
+
         public List<BasicTableInfo> LastUploadRecords(int uploadAmount = 5)
         {
             using (SQLiteConnection lastUploadsConnection = new SQLiteConnection(_sqliteConnection))

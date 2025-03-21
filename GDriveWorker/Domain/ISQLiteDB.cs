@@ -4,6 +4,7 @@ namespace GDriveWorker.Domain
 {
     public interface ISQLiteDB
     {
+        DateTime GetFileUploadTime(string fileName);
         List<BasicTableInfo> LastUploadRecords(int uploadAmount = 5);
         List<BasicTableInfo> LastInformationRecords(int infoAmount = 5);
         List<BasicTableInfo> LastErrorRecords(int errorAmount = 5);

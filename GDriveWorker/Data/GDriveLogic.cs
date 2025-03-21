@@ -42,6 +42,7 @@ namespace GDriveWorker.Data
             {
                 IUploadProgress fileStatus;
                 string fileID = _googleOperation.FindFileID(Path.GetFileName(file), parentFolderID);
+
                 if (string.IsNullOrWhiteSpace(fileID))
                 {
                     _sqliteDB.InsertInformationdRecord($"File {file} not found, uploading it", DateTime.Now.ToString());
@@ -49,8 +50,18 @@ namespace GDriveWorker.Data
                 }
                 else
                 {
-                    _sqliteDB.InsertInformationdRecord($"File {file} found, updating it", DateTime.Now.ToString());
-                    fileStatus = _googleOperation.UpdateFile(file, fileID);
+                    DateTime lastWrite = File.GetLastWriteTime(file);
+                    DateTime lastUpload = _sqliteDB.GetFileUploadTime(file);
+                    if (lastWrite > lastUpload)
+                    {
+                        _sqliteDB.InsertInformationdRecord($"File {file} found, updating it", DateTime.Now.ToString());
+                        fileStatus = _googleOperation.UpdateFile(file, fileID);
+                    }
+                    else
+                    {                        
+                        _sqliteDB.InsertInformationdRecord($"File {file} has no changes, not updating", DateTime.Now.ToString());
+                        continue;
+                    }
                 }
 
                 if (fileStatus.Status == UploadStatus.Completed)
