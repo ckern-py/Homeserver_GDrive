@@ -1,6 +1,9 @@
 # Homeserver_GDrive
 This is a repo containing a docker container that interacts with Google Drive.
 
+## Prerequisite
+This code requires that you already have a project set up in the google cloud console with the Drive APIs turned on for it and a Service Account running that has access to your drive folder(s). You will need to download the credentials for the Service Account and put the credentials.json file in the /config location
+
 ## Description
 This repo contains a worker project that periodically uploads files for me to Google Drive. The worker is complete with a SQLite DB that stores records of what was uploaded and when. I put an MVC app on top of the worker service to display the most recent results to the user. The MVC App features a min page where you can get an overview of all the information, or you can get more information by going to the individual pages. This solution has been put into a docker container so that you can run it on your local docker stack.
 
@@ -31,7 +34,7 @@ services:
         - AppSettings__DBMaintenanceDelayHours=8
     volumes:
         - /where/you/have/credentials/stored:/config
-        - /location/of/files/you/want/uploaded:/media
+        - /location/of/files/you/want/uploaded:/media/upload
     ports:
         - 8008:8080
     restart: unless-stopped
@@ -47,7 +50,7 @@ services:
 | AppSettings__UploadServiceDelayHours | int | Delay in hours for running the upload worker |
 | AppSettings__DBMaintenanceDelayHours | int | Delay in hours for running the databse maintenance worker |
 | /config | string | Volume where you have put credentials.json. Also will store database |
-| /media | string | Volume where you want files uploaded from |
+| /media/upload | string | Volume where you want files uploaded from |
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)

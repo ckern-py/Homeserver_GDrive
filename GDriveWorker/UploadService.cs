@@ -26,7 +26,7 @@ namespace GDriveWorker
                 {
                     _logger.LogInformation("Running UploadService at {dateTime}", DateTime.Now);
                 }
-                Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/"));
+                Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/upload"));
 
                 double delayHours = Convert.ToDouble(_configuration["AppSettings:UploadServiceDelayHours"]);
                 _sqliteDB.InsertInformationdRecord($"UploadService will execute again in {delayHours} hours", DateTime.Now.ToString());

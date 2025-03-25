@@ -12,5 +12,4 @@ services:
         - AppSettings__DetailUploadRecordsCount=20
     volumes:
       - C:\Temp\config:/config
-      - C:\Temp\upload:/media
-  
+      - C:\Temp\upload:/media/upload
