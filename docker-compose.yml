@@ -13,3 +13,4 @@ services:
     volumes:
       - C:\Temp\config:/config
       - C:\Temp\upload:/media/upload
+      - C:\Temp\download:/media/download
