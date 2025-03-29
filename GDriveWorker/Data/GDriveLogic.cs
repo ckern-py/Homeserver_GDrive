@@ -48,7 +48,7 @@ namespace GDriveWorker.Data
 
                 if (string.IsNullOrWhiteSpace(fileID))
                 {
-                    _sqliteDB.InsertInformationdRecord($"File {RemovePathBeginning(file)} not found, uploading it", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Drive file {RemovePathBeginning(file)} not found, uploading it", DateTime.Now.ToString());
                     fileStatus = _googleOperation.UploadFile(file, parentFolderID);
                 }
                 else
@@ -57,12 +57,12 @@ namespace GDriveWorker.Data
                     DateTime lastUpload = _sqliteDB.GetFileUploadTime(file);
                     if (lastWrite > lastUpload)
                     {
-                        _sqliteDB.InsertInformationdRecord($"File {RemovePathBeginning(file)} found, updating it", DateTime.Now.ToString());
+                        _sqliteDB.InsertInformationdRecord($"Drive file {RemovePathBeginning(file)} found, updating it", DateTime.Now.ToString());
                         fileStatus = _googleOperation.UpdateFile(file, fileID);
                     }
                     else
                     {
-                        _sqliteDB.InsertInformationdRecord($"File {RemovePathBeginning(file)} has no changes, not updating", DateTime.Now.ToString());
+                        _sqliteDB.InsertInformationdRecord($"Drive file {RemovePathBeginning(file)} has no changes, not updating", DateTime.Now.ToString());
                         continue;
                     }
                 }
@@ -88,7 +88,7 @@ namespace GDriveWorker.Data
                 string folderID = _googleOperation.FindFolderID(justFolder, parentFolderID);
                 if (string.IsNullOrWhiteSpace(folderID))
                 {
-                    _sqliteDB.InsertInformationdRecord($"Folder {RemovePathBeginning(directory)} not found, creating it", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Drive folder {RemovePathBeginning(directory)} not found, creating it", DateTime.Now.ToString());
                     folderID = _googleOperation.CreateFolder(justFolder, parentFolderID);
                     _sqliteDB.InsertUploadRecord(RemovePathBeginning(directory), DateTime.Now.ToString());
                 }
@@ -117,8 +117,6 @@ namespace GDriveWorker.Data
 
         private void DownloadFiles(string location, string parentFolderID)
         {
-            //TODO: Get all files in parent folder and download them to the current location
-            //Search google using id in parents, '1234567' in parents
             List<Google.Apis.Drive.v3.Data.File> filesList = _googleOperation.FindAllFiles(parentFolderID);
 
             foreach (Google.Apis.Drive.v3.Data.File googleFile in filesList)
@@ -126,26 +124,25 @@ namespace GDriveWorker.Data
                 string combinedPath = Path.Combine(location, googleFile.Name);
                 if (!File.Exists(combinedPath))
                 {
+                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedPath)} not found, downloading it", DateTime.Now.ToString());
+
                     MemoryStream stream = _googleOperation.DownloadFile(googleFile.Id);
                     using (FileStream fileStream = new FileStream(combinedPath, FileMode.Create, FileAccess.Write))
                     {
                         stream.WriteTo(fileStream);
                     }
-                    //download file
-                    //write db
+
+                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedPath), DateTime.Now.ToString());
                 }
                 else
                 {
-                    //write db
+                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedPath)} found, not downloading", DateTime.Now.ToString());
                 }
             }
         }
 
         private void DownloadFolder(string location, string parentFolderID)
         {
-            //TODO:Get all folders that have parent ID 
-            //Create folder if it doenst exist
-            //Then download files, and then go through directories inside recursivly
             List<Google.Apis.Drive.v3.Data.File> folderList = _googleOperation.FindAllFolders(parentFolderID);
 
             foreach (Google.Apis.Drive.v3.Data.File googleFolders in folderList)
@@ -153,33 +150,14 @@ namespace GDriveWorker.Data
                 string combinedPath = Path.Combine(location, googleFolders.Name);
                 if (!Directory.Exists(combinedPath))
                 {
+                    _sqliteDB.InsertInformationdRecord($"Local folder {RemovePathBeginning(combinedPath)} not found, creating it", DateTime.Now.ToString());
                     Directory.CreateDirectory(combinedPath);
-                    //write db
-                }
-                else
-                {
-                    //write db
+                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedPath), DateTime.Now.ToString());
                 }
 
                 DownloadFiles(combinedPath, googleFolders.Id);
                 DownloadFolder(combinedPath, googleFolders.Id);
             }
-
-            //string[] dir = Directory.GetDirectories(location);
-
-            //foreach (string directory in dir)
-            //{
-            //    string justFolder = new DirectoryInfo(directory).Name;
-            //    string folderID = _googleOperation.FindFolderID(justFolder, parentFolderID);
-            //    if (string.IsNullOrWhiteSpace(folderID))
-            //    {
-            //        _sqliteDB.InsertInformationdRecord($"Folder {directory} not found, creating it", DateTime.Now.ToString());
-            //        folderID = _googleOperation.CreateFolder(justFolder, parentFolderID);
-            //        _sqliteDB.InsertUploadRecord(directory, DateTime.Now.ToString());
-            //    }
-
-            //    UploadFiles(directory, folderID);
-            //    UploadFolder(directory, folderID);
         }
 
         private static string RemovePathBeginning(string location)
