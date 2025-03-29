@@ -6,7 +6,7 @@ namespace GDriveWorker.Domain
     {
         DateTime GetFileUploadTime(string fileName);
         List<BasicTableInfo> LastUploadRecords(int uploadAmount = 5);
-        List<BasicTableInfo> LastDownloadRecords(int uploadAmount = 5);
+        List<BasicTableInfo> LastDownloadRecords(int downloadAmount = 5);
         List<BasicTableInfo> LastInformationRecords(int infoAmount = 5);
         List<BasicTableInfo> LastErrorRecords(int errorAmount = 5);
         int InsertUploadRecord(string fileName, string uploadDT);

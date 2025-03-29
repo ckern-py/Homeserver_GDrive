@@ -39,7 +39,9 @@ namespace GDriveWorker.Data
                 fileUploadConnection.Open();
 
                 SQLiteCommand lastUploadTime = fileUploadConnection.CreateCommand();
-                lastUploadTime.CommandText = $"SELECT UploadDT FROM [FileUploads] WHERE FileName = '{fileName}' ORDER BY ROWID DESC LIMIT 1";
+
+                lastUploadTime.CommandText = "SELECT UploadDT FROM [FileUploads] WHERE FileName = @fileName ORDER BY ROWID DESC LIMIT 1";
+                lastUploadTime.Parameters.AddWithValue("@fileName", fileName);
 
                 SQLiteDataReader sqliteDatareader = lastUploadTime.ExecuteReader();
                 DateTime lastUpload = DateTime.MinValue;
@@ -59,7 +61,9 @@ namespace GDriveWorker.Data
                 lastUploadsConnection.Open();
 
                 SQLiteCommand lastFiveCmd = lastUploadsConnection.CreateCommand();
-                lastFiveCmd.CommandText = $"SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT {uploadAmount}";
+
+                lastFiveCmd.CommandText = "SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT @uploadAmount";
+                lastFiveCmd.Parameters.AddWithValue("@uploadAmount", uploadAmount);
 
                 SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
                 List<BasicTableInfo> fileList = new List<BasicTableInfo>();
@@ -77,14 +81,16 @@ namespace GDriveWorker.Data
             }
         }
 
-        public List<BasicTableInfo> LastDownloadRecords(int uploadAmount = 5)
+        public List<BasicTableInfo> LastDownloadRecords(int downloadAmount = 5)
         {
             using (SQLiteConnection lastUploadsConnection = new SQLiteConnection(_sqliteConnection))
             {
                 lastUploadsConnection.Open();
 
                 SQLiteCommand lastFiveCmd = lastUploadsConnection.CreateCommand();
-                lastFiveCmd.CommandText = $"SELECT * FROM [FileDownloads] ORDER BY ROWID DESC LIMIT {uploadAmount}";
+
+                lastFiveCmd.CommandText = "SELECT * FROM [FileDownloads] ORDER BY ROWID DESC LIMIT @downloadAmount";
+                lastFiveCmd.Parameters.AddWithValue("@downloadAmount", downloadAmount);
 
                 SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
                 List<BasicTableInfo> fileList = new List<BasicTableInfo>();
@@ -109,7 +115,9 @@ namespace GDriveWorker.Data
                 lastInfoConnection.Open();
 
                 SQLiteCommand lastFiveCmd = lastInfoConnection.CreateCommand();
-                lastFiveCmd.CommandText = $"SELECT * FROM [Information] ORDER BY ROWID DESC LIMIT {infoAmount}";
+
+                lastFiveCmd.CommandText = "SELECT * FROM [Information] ORDER BY ROWID DESC LIMIT @infoAmount";
+                lastFiveCmd.Parameters.AddWithValue("@infoAmount", infoAmount);
 
                 SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
                 List<BasicTableInfo> fileList = new List<BasicTableInfo>();
@@ -134,7 +142,9 @@ namespace GDriveWorker.Data
                 lastErrorsConnection.Open();
 
                 SQLiteCommand lastFiveCmd = lastErrorsConnection.CreateCommand();
-                lastFiveCmd.CommandText = $"SELECT * FROM [Errors] ORDER BY ROWID DESC LIMIT {errorAmount}";
+
+                lastFiveCmd.CommandText = "SELECT * FROM [Errors] ORDER BY ROWID DESC LIMIT @errorAmount";
+                lastFiveCmd.Parameters.AddWithValue("@errorAmount", errorAmount);
 
                 SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
                 List<BasicTableInfo> fileList = new List<BasicTableInfo>();
@@ -159,7 +169,11 @@ namespace GDriveWorker.Data
                 newInsertConn.Open();
 
                 SQLiteCommand insertComand = newInsertConn.CreateCommand();
-                insertComand.CommandText = $"INSERT INTO [FileUploads](FileName, UploadDT) VALUES('{fileName}','{uploadDT}'); ";
+
+                insertComand.CommandText = "INSERT INTO [FileUploads](FileName, UploadDT) VALUES(@fileName, @uploadDT);";
+                insertComand.Parameters.AddWithValue("@fileName", fileName);
+                insertComand.Parameters.AddWithValue("@uploadDT", uploadDT);
+
                 int records = insertComand.ExecuteNonQuery();
                 return records;
             }
@@ -171,7 +185,10 @@ namespace GDriveWorker.Data
                 newInsertConn.Open();
 
                 SQLiteCommand insertComand = newInsertConn.CreateCommand();
-                insertComand.CommandText = $"INSERT INTO [FileDownloads](FileName, DownloadDT) VALUES('{fileName}','{downloadDT}'); ";
+                insertComand.CommandText = "INSERT INTO [FileDownloads](FileName, DownloadDT) VALUES(@fileName, @downloadDT);";
+                insertComand.Parameters.AddWithValue("@fileName", fileName);
+                insertComand.Parameters.AddWithValue("@downloadDT", downloadDT);
+
                 int records = insertComand.ExecuteNonQuery();
                 return records;
             }
@@ -184,7 +201,11 @@ namespace GDriveWorker.Data
                 newInsertConn.Open();
 
                 SQLiteCommand insertComand = newInsertConn.CreateCommand();
-                insertComand.CommandText = $"INSERT INTO [Information](InfoMessage, InfoDT) VALUES('{infoMessage}','{infoDT}'); ";
+                
+                insertComand.CommandText = "INSERT INTO [Information](InfoMessage, InfoDT) VALUES(@infoMessage, @infoDT);";
+                insertComand.Parameters.AddWithValue("@infoMessage", infoMessage);
+                insertComand.Parameters.AddWithValue("@infoDT", infoDT);
+
                 int records = insertComand.ExecuteNonQuery();
                 return records;
             }
@@ -197,7 +218,11 @@ namespace GDriveWorker.Data
                 newInsertConn.Open();
 
                 SQLiteCommand insertComand = newInsertConn.CreateCommand();
-                insertComand.CommandText = $"INSERT INTO [Errors](Error, ErrorDT) VALUES('{errorMessage}','{errorDT}'); ";
+
+                insertComand.CommandText = "INSERT INTO [Errors](Error, ErrorDT) VALUES(@errorMessage, @errorDT);";
+                insertComand.Parameters.AddWithValue("@errorMessage", errorMessage);
+                insertComand.Parameters.AddWithValue("@errorDT", errorDT);
+
                 int records = insertComand.ExecuteNonQuery();
                 return records;
             }
