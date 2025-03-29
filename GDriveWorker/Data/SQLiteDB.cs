@@ -18,13 +18,17 @@ namespace GDriveWorker.Data
                 uploadsTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [FileUploads](FileName VARCHAR(200), UploadDT VARCHAR(100))";
                 uploadsTableCmd.ExecuteNonQuery();
 
-                SQLiteCommand errorTableCmd = localDBConn.CreateCommand();
-                errorTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Errors](Error VARCHAR(500), ErrorDT VARCHAR(100))";
-                errorTableCmd.ExecuteNonQuery();
+                SQLiteCommand downloadsTableCmd = localDBConn.CreateCommand();
+                downloadsTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [FileDownloads](FileName VARCHAR(200), DownloadDT VARCHAR(100))";
+                downloadsTableCmd.ExecuteNonQuery();
 
                 SQLiteCommand infoTableCmd = localDBConn.CreateCommand();
                 infoTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Information](InfoMessage VARCHAR(500), InfoDT VARCHAR(100))";
                 infoTableCmd.ExecuteNonQuery();
+
+                SQLiteCommand errorTableCmd = localDBConn.CreateCommand();
+                errorTableCmd.CommandText = "CREATE TABLE IF NOT EXISTS [Errors](Error VARCHAR(500), ErrorDT VARCHAR(100))";
+                errorTableCmd.ExecuteNonQuery();
             }
         }
 
@@ -56,6 +60,31 @@ namespace GDriveWorker.Data
 
                 SQLiteCommand lastFiveCmd = lastUploadsConnection.CreateCommand();
                 lastFiveCmd.CommandText = $"SELECT * FROM [FileUploads] ORDER BY ROWID DESC LIMIT {uploadAmount}";
+
+                SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
+                List<BasicTableInfo> fileList = new List<BasicTableInfo>();
+                while (sqliteDatareader.Read())
+                {
+                    BasicTableInfo info = new BasicTableInfo()
+                    {
+                        TableMessage = sqliteDatareader.GetString(0),
+                        MessageDT = sqliteDatareader.GetString(1)
+                    };
+                    fileList.Add(info);
+                }
+
+                return fileList;
+            }
+        }
+
+        public List<BasicTableInfo> LastDownloadRecords(int uploadAmount = 5)
+        {
+            using (SQLiteConnection lastUploadsConnection = new SQLiteConnection(_sqliteConnection))
+            {
+                lastUploadsConnection.Open();
+
+                SQLiteCommand lastFiveCmd = lastUploadsConnection.CreateCommand();
+                lastFiveCmd.CommandText = $"SELECT * FROM [FileDownloads] ORDER BY ROWID DESC LIMIT {uploadAmount}";
 
                 SQLiteDataReader sqliteDatareader = lastFiveCmd.ExecuteReader();
                 List<BasicTableInfo> fileList = new List<BasicTableInfo>();
@@ -135,6 +164,18 @@ namespace GDriveWorker.Data
                 return records;
             }
         }
+        public int InsertDownloadRecord(string fileName, string downloadDT)
+        {
+            using (SQLiteConnection newInsertConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newInsertConn.Open();
+
+                SQLiteCommand insertComand = newInsertConn.CreateCommand();
+                insertComand.CommandText = $"INSERT INTO [FileDownloads](FileName, DownloadDT) VALUES('{fileName}','{downloadDT}'); ";
+                int records = insertComand.ExecuteNonQuery();
+                return records;
+            }
+        }
 
         public int InsertInformationdRecord(string infoMessage, string infoDT)
         {
@@ -175,6 +216,19 @@ namespace GDriveWorker.Data
             }
         }
 
+        public int DeleteOldFileDownloadsRecords()
+        {
+            using (SQLiteConnection newDeleteConn = new SQLiteConnection(_sqliteConnection))
+            {
+                newDeleteConn.Open();
+
+                SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
+                deleteComand.CommandText = $"DELETE FROM FileDownloads WHERE ROWID NOT IN (SELECT ROWID FROM FileDownloads ORDER BY ROWID DESC LIMIT 50)";
+                int records = deleteComand.ExecuteNonQuery();
+                return records;
+            }
+        }
+
         public int DeleteOldInformationRecords()
         {
             using (SQLiteConnection newDeleteConn = new SQLiteConnection(_sqliteConnection))
@@ -209,6 +263,19 @@ namespace GDriveWorker.Data
 
                 SQLiteCommand countComand = countUploadsConnection.CreateCommand();
                 countComand.CommandText = $"SELECT COUNT(*) FROM [FileUploads]";
+                int records = Convert.ToInt32(countComand.ExecuteScalar());
+                return records;
+            }
+        }
+
+        public int CountDownloadRecords()
+        {
+            using (SQLiteConnection countUploadsConnection = new SQLiteConnection(_sqliteConnection))
+            {
+                countUploadsConnection.Open();
+
+                SQLiteCommand countComand = countUploadsConnection.CreateCommand();
+                countComand.CommandText = $"SELECT COUNT(*) FROM [FileDownloads]";
                 int records = Convert.ToInt32(countComand.ExecuteScalar());
                 return records;
             }

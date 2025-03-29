@@ -75,6 +75,28 @@ namespace GDriveWorker.Data
             return fileID;
         }
 
+        public List<Google.Apis.Drive.v3.Data.File> FindAllFiles(string parentID, string nextPageToken = "")
+        {
+            DriveService driveService = SALogin();
+
+            FilesResource.ListRequest files = driveService.Files.List();
+            files.Q = $"mimeType != 'application/vnd.google-apps.folder' and '{parentID}' in parents";
+            if (!string.IsNullOrWhiteSpace(nextPageToken))
+            {
+                files.PageToken = nextPageToken;
+            }
+            Google.Apis.Drive.v3.Data.FileList fileList = files.Execute();
+
+            List<Google.Apis.Drive.v3.Data.File> allFiles = fileList.Files.ToList();
+
+            if (!string.IsNullOrWhiteSpace(fileList.NextPageToken))
+            {
+                allFiles.AddRange(FindAllFiles(parentID, fileList.NextPageToken));
+            }
+
+            return allFiles;
+        }
+
         public string CreateFolder(string folderName, string parentID, string folderID = "")
         {
             DriveService driveService = SALogin();

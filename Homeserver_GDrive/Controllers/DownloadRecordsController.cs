@@ -5,13 +5,13 @@ using System.Diagnostics;
 
 namespace Homeserver_GDrive.Controllers;
 
-public class UploadRecordsController : Controller
+public class DownloadRecordsController : Controller
 {
     private readonly ISQLiteDB _liteDB;
     private readonly IGoogleOperations _googleOperations;
     private readonly IConfiguration _configuration;
 
-    public UploadRecordsController(ISQLiteDB liteDB, IGoogleOperations googleOperations, IConfiguration configuration)
+    public DownloadRecordsController(ISQLiteDB liteDB, IGoogleOperations googleOperations, IConfiguration configuration)
     {
         _liteDB = liteDB;
         _googleOperations = googleOperations;
@@ -22,12 +22,12 @@ public class UploadRecordsController : Controller
     {
         Google.Apis.Drive.v3.Data.About userInfo = _googleOperations.GetUserInfo();
 
-        int uploadRecordCount = Convert.ToInt32(_configuration["AppSettings:DetailUploadRecordsCount"]);
-        UploadRecordsViewModel viewInfo = new UploadRecordsViewModel()
+        int uploadRecordCount = Convert.ToInt32(_configuration["AppSettings:DetailDownloadRecordsCount"]);
+        DownloadRecordsViewModel viewInfo = new DownloadRecordsViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
-            UploadInfo = _liteDB.LastUploadRecords(uploadRecordCount),
-            UploadCount = _liteDB.CountUploadRecords()
+            DownloadInfo = _liteDB.LastDownloadRecords(uploadRecordCount),
+            DownloadCount = _liteDB.CountDownloadRecords()
         };
 
         return View(viewInfo);

@@ -120,7 +120,20 @@ namespace GDriveWorker.Data
         {
             //TODO: Get all files in parent folder and download them to the current location
             //Search google using id in parents, '1234567' in parents
+            List<Google.Apis.Drive.v3.Data.File> filesList = _googleOperation.FindAllFiles(parentFolderID);
 
+            foreach(Google.Apis.Drive.v3.Data.File googleFile in filesList)
+            {
+                if(!File.Exists(Path.Combine(location, googleFile.Name)))
+                {
+                    //download file
+                    //write db
+                }
+                else
+                {
+                    //write db
+                }
+            }
 
             //string[] files = Directory.GetFiles(location);
             //foreach (string file in files)

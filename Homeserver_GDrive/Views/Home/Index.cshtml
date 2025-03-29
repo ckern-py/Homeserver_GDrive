@@ -36,6 +36,29 @@
 
     <div class="text-center">
         <br />
+        <b>Upload Records:</b> Showing 5 of @Model.DownloadCount records
+        <br />
+    </div>
+    @foreach (BasicTableInfo downloadInfo in Model.DownloadInfo)
+    {
+        <div class="container pt-2 w-100">
+            <div class="row ">
+                <div class="col-sm-4 w-50" style=" border: 1px solid;">
+                    <div>
+                        <b>Name:</b> @downloadInfo.TableMessage
+                    </div>
+                </div>
+                <div class="col-sm-4 w-50" style=" border: 1px solid;">
+                    <div >
+                        <b>Time:</b> @downloadInfo.MessageDT
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="text-center">
+        <br />
         <b>Info Records:</b> Showing 5 of @Model.InfoCount records
         <br />
     </div>

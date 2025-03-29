@@ -1,8 +1,8 @@
 ﻿@inject IConfiguration Configuration
 @using GDriveWorker.Metadata
-@model UploadRecordsViewModel
+@model DownloadRecordsViewModel
 @{
-    ViewData["Title"] = "Upload Records";
+    ViewData["Title"] = "Download Records";
 }
 
 <div class="text-center">
@@ -14,21 +14,21 @@
 <body>
     <div class="text-center">
         <br />
-        <b>Upload Records:</b> Showing @Configuration["AppSettings:DetailUploadRecordsCount"] of @Model.UploadCount records
+        <b>Info Records:</b> Showing @Configuration["AppSettings:DetailDownloadRecordsCount"] of @Model.DownloadCount records
         <br />
     </div>
-    @foreach (BasicTableInfo uploadInfo in Model.UploadInfo)
+    @foreach (BasicTableInfo downloadInfo in Model.DownloadInfo)
     {
         <div class="container pt-2 w-100">
             <div class="row ">
                 <div class="col-sm-4 w-50" style=" border: 1px solid;">
                     <div>
-                        <b>Name:</b> @uploadInfo.TableMessage
+                        <b>Name:</b> @downloadInfo.TableMessage
                     </div>
                 </div>
                 <div class="col-sm-4 w-50" style=" border: 1px solid;">
-                    <div >
-                        <b>Time:</b> @uploadInfo.MessageDT
+                    <div>
+                        <b>Time:</b> @downloadInfo.MessageDT
                     </div>
                 </div>
             </div>

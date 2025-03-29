@@ -7,13 +7,11 @@ namespace Homeserver_GDrive.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
     private readonly ISQLiteDB _liteDB;
     private readonly IGoogleOperations _googleOperations;
 
-    public HomeController(ILogger<HomeController> logger, ISQLiteDB liteDB, IGoogleOperations googleOperations)
+    public HomeController(ISQLiteDB liteDB, IGoogleOperations googleOperations)
     {
-        _logger = logger;
         _liteDB = liteDB;
         _googleOperations = googleOperations;
     }
