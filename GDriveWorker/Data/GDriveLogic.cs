@@ -1,5 +1,6 @@
 ﻿using GDriveWorker.Domain;
 using Google.Apis.Upload;
+using System.IO;
 
 namespace GDriveWorker.Data
 {
@@ -9,6 +10,9 @@ namespace GDriveWorker.Data
         private readonly ILogger<GDriveLogic> _logger;
         private readonly ISQLiteDB _sqliteDB;
         private readonly IConfiguration _configuration;
+
+        private static readonly string uploadLocation = "/../media/upload";
+        private static readonly string downloadLocation = "/../media/download";
 
         public GDriveLogic(ILogger<GDriveLogic> logger, IGoogleOperations googleOperations, ISQLiteDB sqliteDB, IConfiguration configuration)
         {
@@ -45,7 +49,7 @@ namespace GDriveWorker.Data
 
                 if (string.IsNullOrWhiteSpace(fileID))
                 {
-                    _sqliteDB.InsertInformationdRecord($"File {file} not found, uploading it", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"File {RemovePathBeginning(file)} not found, uploading it", DateTime.Now.ToString());
                     fileStatus = _googleOperation.UploadFile(file, parentFolderID);
                 }
                 else
@@ -54,19 +58,19 @@ namespace GDriveWorker.Data
                     DateTime lastUpload = _sqliteDB.GetFileUploadTime(file);
                     if (lastWrite > lastUpload)
                     {
-                        _sqliteDB.InsertInformationdRecord($"File {file} found, updating it", DateTime.Now.ToString());
+                        _sqliteDB.InsertInformationdRecord($"File {RemovePathBeginning(file)} found, updating it", DateTime.Now.ToString());
                         fileStatus = _googleOperation.UpdateFile(file, fileID);
                     }
                     else
                     {
-                        _sqliteDB.InsertInformationdRecord($"File {file} has no changes, not updating", DateTime.Now.ToString());
+                        _sqliteDB.InsertInformationdRecord($"File {RemovePathBeginning(file)} has no changes, not updating", DateTime.Now.ToString());
                         continue;
                     }
                 }
 
                 if (fileStatus.Status == UploadStatus.Completed)
                 {
-                    _sqliteDB.InsertUploadRecord(file, DateTime.Now.ToString());
+                    _sqliteDB.InsertUploadRecord(RemovePathBeginning(file), DateTime.Now.ToString());
                 }
                 else
                 {
@@ -85,9 +89,9 @@ namespace GDriveWorker.Data
                 string folderID = _googleOperation.FindFolderID(justFolder, parentFolderID);
                 if (string.IsNullOrWhiteSpace(folderID))
                 {
-                    _sqliteDB.InsertInformationdRecord($"Folder {directory} not found, creating it", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Folder {RemovePathBeginning(directory)} not found, creating it", DateTime.Now.ToString());
                     folderID = _googleOperation.CreateFolder(justFolder, parentFolderID);
-                    _sqliteDB.InsertUploadRecord(directory, DateTime.Now.ToString());
+                    _sqliteDB.InsertUploadRecord(RemovePathBeginning(directory), DateTime.Now.ToString());
                 }
 
                 UploadFiles(directory, folderID);
@@ -114,6 +118,10 @@ namespace GDriveWorker.Data
 
         private void DownloadFiles(string location, string parentFolderID)
         {
+            //TODO: Get all files in parent folder and download them to the current location
+            //Search google using id in parents, '1234567' in parents
+
+
             //string[] files = Directory.GetFiles(location);
             //foreach (string file in files)
             //{
@@ -154,6 +162,16 @@ namespace GDriveWorker.Data
 
         private void DownloadFolder(string location, string parentFolderID)
         {
+            //TODO:Get all folders that have parent ID 
+            //Create folder if it doenst exist
+            //Then download files, and then go through directories inside recursivly
+
+
+            //Get current patht and then combine with folder name
+            if (!Directory.Exists(location))
+            {
+                Directory.CreateDirectory(location);
+            }
             //string[] dir = Directory.GetDirectories(location);
 
             //foreach (string directory in dir)
@@ -169,6 +187,20 @@ namespace GDriveWorker.Data
 
             //    UploadFiles(directory, folderID);
             //    UploadFolder(directory, folderID);
+        }
+
+        private static string RemovePathBeginning(string location)
+        {
+            if (location.Contains(uploadLocation))
+            {
+                location = location.Remove(0, uploadLocation.Length);
+            }
+            else if (location.Contains(downloadLocation))
+            {
+                location = location.Remove(0, downloadLocation.Length);
+            }
+
+            return location;
         }
     }
 }
