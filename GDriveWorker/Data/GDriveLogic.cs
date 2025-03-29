@@ -97,7 +97,7 @@ namespace GDriveWorker.Data
                 UploadFolder(directory, folderID);
             }
         }
-
+        //TODO: Error insert on downloads
         public void DownloadMediaDirectory(string location)
         {
             string topLevelFolder = _configuration["AppSettings:TopLevelGDriveDownloadFolder"];
