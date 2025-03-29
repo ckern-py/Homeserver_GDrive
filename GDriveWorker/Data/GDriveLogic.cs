@@ -97,7 +97,7 @@ namespace GDriveWorker.Data
                 UploadFolder(directory, folderID);
             }
         }
-        //TODO: Error insert on downloads
+        
         public void DownloadMediaDirectory(string location)
         {
             string topLevelFolder = _configuration["AppSettings:TopLevelGDriveDownloadFolder"];
@@ -126,13 +126,19 @@ namespace GDriveWorker.Data
                 {
                     _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedPath)} not found, downloading it", DateTime.Now.ToString());
 
-                    MemoryStream stream = _googleOperation.DownloadFile(googleFile.Id);
-                    using (FileStream fileStream = new FileStream(combinedPath, FileMode.Create, FileAccess.Write))
+                    try
                     {
-                        stream.WriteTo(fileStream);
+                        MemoryStream stream = _googleOperation.DownloadFile(googleFile.Id);
+                        using (FileStream fileStream = new FileStream(combinedPath, FileMode.Create, FileAccess.Write))
+                        {
+                            stream.WriteTo(fileStream);
+                        }
+                        _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedPath), DateTime.Now.ToString());
                     }
-
-                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedPath), DateTime.Now.ToString());
+                    catch(Exception e)
+                    {
+                        _sqliteDB.InsertErrorRecord($"Failed to download: {e.Message}", DateTime.Now.ToString());
+                    }                    
                 }
                 else
                 {
