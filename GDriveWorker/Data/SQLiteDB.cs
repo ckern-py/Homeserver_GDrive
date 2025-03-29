@@ -236,7 +236,7 @@ namespace GDriveWorker.Data
                 newDeleteConn.Open();
 
                 SQLiteCommand deleteComand = newDeleteConn.CreateCommand();
-                deleteComand.CommandText = $"DELETE FROM [Information] WHERE ROWID NOT IN (SELECT ROWID FROM [Information] ORDER BY ROWID DESC LIMIT 48)";
+                deleteComand.CommandText = $"DELETE FROM [Information] WHERE ROWID NOT IN (SELECT ROWID FROM [Information] ORDER BY ROWID DESC LIMIT 47)";
                 int records = deleteComand.ExecuteNonQuery();
                 return records;
             }

@@ -12,6 +12,6 @@ namespace Homeserver_GDrive.Models
         public List<BasicTableInfo> UploadInfo { get; set; }
         public List<BasicTableInfo> DownloadInfo { get; set; }
         public List<BasicTableInfo> InfoInfo { get; set; }
-        public List<BasicTableInfo> ErrorInfo { get; set; }        
+        public List<BasicTableInfo> ErrorInfo { get; set; }
     }
 }

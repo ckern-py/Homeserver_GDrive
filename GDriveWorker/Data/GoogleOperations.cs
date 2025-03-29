@@ -75,6 +75,28 @@ namespace GDriveWorker.Data
             return fileID;
         }
 
+        public List<Google.Apis.Drive.v3.Data.File> FindAllFolders(string parentID, string nextPageToken = "")
+        {
+            DriveService driveService = SALogin();
+
+            FilesResource.ListRequest folders = driveService.Files.List();
+            folders.Q = $"mimeType = 'application/vnd.google-apps.folder' and '{parentID}' in parents";
+            if (!string.IsNullOrWhiteSpace(nextPageToken))
+            {
+                folders.PageToken = nextPageToken;
+            }
+            Google.Apis.Drive.v3.Data.FileList fileList = folders.Execute();
+
+            List<Google.Apis.Drive.v3.Data.File> allFolders = fileList.Files.ToList();
+
+            if (!string.IsNullOrWhiteSpace(fileList.NextPageToken))
+            {
+                allFolders.AddRange(FindAllFiles(parentID, fileList.NextPageToken));
+            }
+
+            return allFolders;
+        }
+
         public List<Google.Apis.Drive.v3.Data.File> FindAllFiles(string parentID, string nextPageToken = "")
         {
             DriveService driveService = SALogin();
@@ -162,6 +184,18 @@ namespace GDriveWorker.Data
                 uploadProgress = updateRequest.Upload();
             }
             return uploadProgress;
+        }
+
+        public MemoryStream DownloadFile(string fileID)
+        {
+            DriveService driveService = SALogin();
+
+            FilesResource.GetRequest fileRequest = driveService.Files.Get(fileID);
+            MemoryStream memoryStream = new MemoryStream();
+
+            fileRequest.Download(memoryStream);
+
+            return memoryStream;
         }
 
         private DriveService SALogin()

@@ -32,6 +32,13 @@ namespace GDriveWorker
                     _logger.LogInformation("Removed {delUploadCount} records from [FileUploads] at {datetime}", delUploadCount, DateTime.Now);
                 }
 
+                int delDownloadCount = _sqliteDB.DeleteOldFileDownloadsRecords();
+                _sqliteDB.InsertInformationdRecord($"Removed {delDownloadCount} records from [FileDownloads]", DateTime.Now.ToString());
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("Removed {delUploadCount} records from [FileDownloads] at {datetime}", delDownloadCount, DateTime.Now);
+                }
+
                 int delErrorCount = _sqliteDB.DeleteOldErrorsRecords();
                 _sqliteDB.InsertInformationdRecord($"Removed {delErrorCount} records from [Errors]", DateTime.Now.ToString());
                 if (_logger.IsEnabled(LogLevel.Information))

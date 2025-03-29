@@ -25,6 +25,8 @@ public class HomeController : Controller
             ServiceAccountName = userInfo.User.DisplayName,
             UploadInfo = _liteDB.LastUploadRecords(),
             UploadCount = _liteDB.CountUploadRecords(),
+            DownloadInfo = _liteDB.LastDownloadRecords(),
+            DownloadCount = _liteDB.CountDownloadRecords(),
             InfoInfo = _liteDB.LastInformationRecords(),
             InfoCount = _liteDB.CountInfoRecords(),
             ErrorInfo = _liteDB.LastErrorRecords(),
