@@ -23,7 +23,7 @@ namespace GDriveWorker.Data
 
         public void UploadMediaDirectory(string location)
         {
-            string topLevelFolder = _configuration["AppSettings:TopLevelGDriveUploadFolder"];
+            string topLevelFolder = _configuration["AppSettings:TopLevelGDriveUploadFolder"] ?? "";
             string parentFolderID = _googleOperation.FindFolderID(topLevelFolder);
 
             if (string.IsNullOrWhiteSpace(parentFolderID))
@@ -97,22 +97,35 @@ namespace GDriveWorker.Data
                 UploadFolder(directory, folderID);
             }
         }
-        
+
         public void DownloadMediaDirectory(string location)
         {
-            string topLevelFolder = _configuration["AppSettings:TopLevelGDriveDownloadFolder"];
-            string parentFolderID = _googleOperation.FindFolderID(topLevelFolder);
+            string allDownloadFolders = _configuration["AppSettings:TopLevelGDriveDownloadFolder"] ?? "";
+            string[] foldersArray = allDownloadFolders.Split(',');
 
-            if (string.IsNullOrWhiteSpace(parentFolderID))
+            foreach (string topLevelFolder in foldersArray)
             {
-                _logger.LogInformation("Could not find parent folder {parent}", topLevelFolder);
-                _sqliteDB.InsertInformationdRecord($"Could not find parent folder {topLevelFolder}", DateTime.Now.ToString());
-                return;
+                string parentFolderID = _googleOperation.FindFolderID(topLevelFolder);
+
+                if (string.IsNullOrWhiteSpace(parentFolderID))
+                {
+                    _logger.LogInformation("Could not find parent folder {parent}", topLevelFolder);
+                    _sqliteDB.InsertInformationdRecord($"Could not find parent folder {topLevelFolder}", DateTime.Now.ToString());
+                    continue;
+                }
+
+                string combinedDownloadPath = Path.Combine(location, topLevelFolder);
+                if (!Directory.Exists(combinedDownloadPath))
+                {
+                    _sqliteDB.InsertInformationdRecord($"Local folder {RemovePathBeginning(combinedDownloadPath)} not found, creating it", DateTime.Now.ToString());
+                    Directory.CreateDirectory(combinedDownloadPath);
+                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedDownloadPath), DateTime.Now.ToString());
+                }
+
+                DownloadFiles(combinedDownloadPath, parentFolderID);
+
+                DownloadFolder(combinedDownloadPath, parentFolderID);
             }
-
-            DownloadFiles(location, parentFolderID);
-
-            DownloadFolder(location, parentFolderID);
         }
 
         private void DownloadFiles(string location, string parentFolderID)
@@ -121,28 +134,28 @@ namespace GDriveWorker.Data
 
             foreach (Google.Apis.Drive.v3.Data.File googleFile in filesList)
             {
-                string combinedPath = Path.Combine(location, googleFile.Name);
-                if (!File.Exists(combinedPath))
+                string combinedFilePath = Path.Combine(location, googleFile.Name);
+                if (!File.Exists(combinedFilePath))
                 {
-                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedPath)} not found, downloading it", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedFilePath)} not found, downloading it", DateTime.Now.ToString());
 
                     try
                     {
                         MemoryStream stream = _googleOperation.DownloadFile(googleFile.Id);
-                        using (FileStream fileStream = new FileStream(combinedPath, FileMode.Create, FileAccess.Write))
+                        using (FileStream fileStream = new FileStream(combinedFilePath, FileMode.Create, FileAccess.Write))
                         {
                             stream.WriteTo(fileStream);
                         }
-                        _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedPath), DateTime.Now.ToString());
+                        _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedFilePath), DateTime.Now.ToString());
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         _sqliteDB.InsertErrorRecord($"Failed to download: {e.Message}", DateTime.Now.ToString());
-                    }                    
+                    }
                 }
                 else
                 {
-                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedPath)} found, not downloading", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedFilePath)} found, not downloading", DateTime.Now.ToString());
                 }
             }
         }
@@ -153,16 +166,16 @@ namespace GDriveWorker.Data
 
             foreach (Google.Apis.Drive.v3.Data.File googleFolders in folderList)
             {
-                string combinedPath = Path.Combine(location, googleFolders.Name);
-                if (!Directory.Exists(combinedPath))
+                string combinedFolderPath = Path.Combine(location, googleFolders.Name);
+                if (!Directory.Exists(combinedFolderPath))
                 {
-                    _sqliteDB.InsertInformationdRecord($"Local folder {RemovePathBeginning(combinedPath)} not found, creating it", DateTime.Now.ToString());
-                    Directory.CreateDirectory(combinedPath);
-                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedPath), DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Local folder {RemovePathBeginning(combinedFolderPath)} not found, creating it", DateTime.Now.ToString());
+                    Directory.CreateDirectory(combinedFolderPath);
+                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedFolderPath), DateTime.Now.ToString());
                 }
 
-                DownloadFiles(combinedPath, googleFolders.Id);
-                DownloadFolder(combinedPath, googleFolders.Id);
+                DownloadFiles(combinedFolderPath, googleFolders.Id);
+                DownloadFolder(combinedFolderPath, googleFolders.Id);
             }
         }
 

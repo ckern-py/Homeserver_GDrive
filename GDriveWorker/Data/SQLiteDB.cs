@@ -201,7 +201,7 @@ namespace GDriveWorker.Data
                 newInsertConn.Open();
 
                 SQLiteCommand insertComand = newInsertConn.CreateCommand();
-                
+
                 insertComand.CommandText = "INSERT INTO [Information](InfoMessage, InfoDT) VALUES(@infoMessage, @infoDT);";
                 insertComand.Parameters.AddWithValue("@infoMessage", infoMessage);
                 insertComand.Parameters.AddWithValue("@infoDT", infoDT);
