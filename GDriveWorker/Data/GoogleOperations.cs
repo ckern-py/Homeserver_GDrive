@@ -119,6 +119,16 @@ namespace GDriveWorker.Data
             return allFiles;
         }
 
+        public string GetFileByID(string fileID)
+        {
+            DriveService driveService = SALogin();
+
+            FilesResource.GetRequest fileRequest = driveService.Files.Get(fileID);
+            Google.Apis.Drive.v3.Data.File foundFile = fileRequest.Execute();
+
+            return foundFile.Name;
+        }
+
         public string CreateFolder(string folderName, string parentID, string folderID = "")
         {
             DriveService driveService = SALogin();

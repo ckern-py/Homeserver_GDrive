@@ -105,16 +105,35 @@ namespace GDriveWorker.Data
 
             foreach (string topLevelFolder in foldersArray)
             {
-                string parentFolderID = _googleOperation.FindFolderID(topLevelFolder);
+                string currentFolder = topLevelFolder;
+                string currentFolderID = string.Empty;
 
-                if (string.IsNullOrWhiteSpace(parentFolderID))
+                if (topLevelFolder.StartsWith("ID:"))
                 {
-                    _logger.LogInformation("Could not find parent folder {parent}", topLevelFolder);
-                    _sqliteDB.InsertInformationdRecord($"Could not find parent folder {topLevelFolder}", DateTime.Now.ToString());
-                    continue;
+                    currentFolderID = topLevelFolder.Remove(0, 3);
+                    string foldderName = _googleOperation.GetFileByID(currentFolderID);
+                    if (string.IsNullOrWhiteSpace(foldderName))
+                    {
+                        _logger.LogInformation("Could not find folder with ID {folderID}", currentFolderID);
+                        _sqliteDB.InsertInformationdRecord($"Could not find folder with ID {currentFolderID}", DateTime.Now.ToString());
+                        continue;
+                    }
+                    currentFolder = foldderName;
+                }
+                else
+                {
+                    currentFolderID = _googleOperation.FindFolderID(currentFolder);
+
+                    if (string.IsNullOrWhiteSpace(currentFolderID))
+                    {
+                        _logger.LogInformation("Could not find parent folder {parent}", currentFolder);
+                        _sqliteDB.InsertInformationdRecord($"Could not find parent folder {currentFolder}", DateTime.Now.ToString());
+                        continue;
+                    }
                 }
 
-                string combinedDownloadPath = Path.Combine(location, topLevelFolder);
+
+                string combinedDownloadPath = Path.Combine(location, currentFolder);
                 if (!Directory.Exists(combinedDownloadPath))
                 {
                     _sqliteDB.InsertInformationdRecord($"Local folder {RemovePathBeginning(combinedDownloadPath)} not found, creating it", DateTime.Now.ToString());
@@ -122,9 +141,9 @@ namespace GDriveWorker.Data
                     _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedDownloadPath), DateTime.Now.ToString());
                 }
 
-                DownloadFiles(combinedDownloadPath, parentFolderID);
+                DownloadFiles(combinedDownloadPath, currentFolderID);
 
-                DownloadFolder(combinedDownloadPath, parentFolderID);
+                DownloadFolder(combinedDownloadPath, currentFolderID);
             }
         }
 
