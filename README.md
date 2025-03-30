@@ -28,13 +28,17 @@ services:
         - AppSettings__DetailErrorRecordsCount=10
         - AppSettings__DetailInfoRecordsCount=20
         - AppSettings__DetailUploadRecordsCount=15
-        - AppSettings__TopLevelGDriveFolder=Google_Folder_Name
+        - AppSettings__DetailDownloadRecordsCount=15
+        - AppSettings__TopLevelGDriveUploadFolder=Google_Folder_Name
+        - AppSettings__TopLevelGDriveDownloadFolder=Google_Folder_Name,Another Folder,Last-Folder
         - AppSettings__GoogleApplicationName=Google_App_Name
         - AppSettings__UploadServiceDelayHours=8
+        - AppSettings__DownloadServiceDelayHours=8
         - AppSettings__DBMaintenanceDelayHours=8
     volumes:
         - /where/you/have/credentials/stored:/config
         - /location/of/files/you/want/uploaded:/media/upload
+        - /location/of/files/you/want/downloaded:/media/download
     ports:
         - 8008:8080
     restart: unless-stopped
@@ -45,12 +49,16 @@ services:
 | AppSettings__DetailErrorRecordsCount | int | Number of records to show on that page |
 | AppSettings__DetailInfoRecordsCount | int | Number of records to show on that page |
 | AppSettings__DetailUploadRecordsCount | int | Number of records to show on that page |
-| AppSettings__TopLevelGDriveFolde | string | Folder name in Google Drive where uploads go |
+| AppSettings__DetailDownloadRecordsCount | int | Number of records to show on that page |
+| AppSettings__TopLevelGDriveUploadFolder | string | Folder name in Google Drive where uploads go |
+| AppSettings__TopLevelGDriveDownloadFolder | string | Folder(s) in Google Drive you want downloaded. Names need to be comma separated for multiple |
 | AppSettings__GoogleApplicationName | string | Name of Google Application you created |
 | AppSettings__UploadServiceDelayHours | int | Delay in hours for running the upload worker |
+| AppSettings__DownloadServiceDelayHours | int | Delay in hours for running the download worker |
 | AppSettings__DBMaintenanceDelayHours | int | Delay in hours for running the databse maintenance worker |
 | /config | string | Volume where you have put credentials.json. Also will store database |
 | /media/upload | string | Volume where you want files uploaded from |
+| /media/download | string | Volume where you want files downloaded to |
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
