@@ -286,17 +286,22 @@ namespace GDriveWorker.Data
 
         private DriveService SALogin()
         {
-            GoogleCredential credential;
-            using (FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read))
+            if (!_memoryCache.TryGetValue("DRIVE_SERVICE", out DriveService driveService))
             {
-                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-            }
+                GoogleCredential credential;
+                using (FileStream stream = new FileStream("/../config/credentials.json", FileMode.Open, FileAccess.Read))
+                {
+                    credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+                }
 
-            DriveService driveService = new DriveService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = _configuration["AppSettings:GoogleApplicationName"]
-            });
+                driveService = new DriveService(new BaseClientService.Initializer
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = _configuration["AppSettings:GoogleApplicationName"]
+                });
+
+                _memoryCache.Set("DRIVE_SERVICE", driveService, TimeSpan.FromHours(1));
+            }
 
             return driveService;
         }
