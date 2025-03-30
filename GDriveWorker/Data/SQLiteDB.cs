@@ -6,7 +6,7 @@ namespace GDriveWorker.Data
 {
     public class SQLiteDB : ISQLiteDB
     {
-        private static readonly string _sqliteConnection = "Data Source=/../config/upload.db; Version = 3;";
+        private static readonly string _sqliteConnection = "Data Source=/../config/gdrive.db; Version = 3;";
 
         public static void InitializeDB()
         {
