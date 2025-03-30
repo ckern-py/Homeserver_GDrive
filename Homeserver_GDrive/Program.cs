@@ -21,6 +21,7 @@ namespace Homeserver_GDrive
             builder.Services.AddSingleton<IGoogleOperations, GoogleOperations>();
             builder.Services.AddTransient<IGDriveLogic, GDriveLogic>();
             builder.Services.AddHostedService<UploadService>();
+            builder.Services.AddHostedService<DownloadService>();
             builder.Services.AddHostedService<DBMaintenance>();
 
             WebApplication app = builder.Build();

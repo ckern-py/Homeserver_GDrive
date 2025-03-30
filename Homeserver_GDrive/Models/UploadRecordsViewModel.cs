@@ -2,7 +2,7 @@
 
 namespace Homeserver_GDrive.Models
 {
-    public class UploadrRecordsViewModel
+    public class UploadRecordsViewModel
     {
         public string ServiceAccountName { get; set; } = "";
         public int UploadCount { get; set; } = 0;

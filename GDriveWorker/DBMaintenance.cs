@@ -32,11 +32,11 @@ namespace GDriveWorker
                     _logger.LogInformation("Removed {delUploadCount} records from [FileUploads] at {datetime}", delUploadCount, DateTime.Now);
                 }
 
-                int delInfoCount = _sqliteDB.DeleteOldInformationRecords();
-                _sqliteDB.InsertInformationdRecord($"Removed {delInfoCount} records from [Information]", DateTime.Now.ToString());
+                int delDownloadCount = _sqliteDB.DeleteOldFileDownloadsRecords();
+                _sqliteDB.InsertInformationdRecord($"Removed {delDownloadCount} records from [FileDownloads]", DateTime.Now.ToString());
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Removed {delInfoCount} records from [Information] at {datetime}", delInfoCount, DateTime.Now);
+                    _logger.LogInformation("Removed {delUploadCount} records from [FileDownloads] at {datetime}", delDownloadCount, DateTime.Now);
                 }
 
                 int delErrorCount = _sqliteDB.DeleteOldErrorsRecords();
@@ -44,6 +44,13 @@ namespace GDriveWorker
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     _logger.LogInformation("Removed {delErrorCount} records from [Errors] at {datetime}", delErrorCount, DateTime.Now);
+                }
+
+                int delInfoCount = _sqliteDB.DeleteOldInformationRecords();
+                _sqliteDB.InsertInformationdRecord($"Removed {delInfoCount} records from [Information]", DateTime.Now.ToString());
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("Removed {delInfoCount} records from [Information] at {datetime}", delInfoCount, DateTime.Now);
                 }
 
                 if (_logger.IsEnabled(LogLevel.Information))

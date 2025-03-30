@@ -1,36 +1,33 @@
-using GDriveWorker.Domain;
+﻿using GDriveWorker.Domain;
 using Homeserver_GDrive.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace Homeserver_GDrive.Controllers;
 
-public class HomeController : Controller
+public class DownloadRecordsController : Controller
 {
     private readonly ISQLiteDB _liteDB;
     private readonly IGoogleOperations _googleOperations;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(ISQLiteDB liteDB, IGoogleOperations googleOperations)
+    public DownloadRecordsController(ISQLiteDB liteDB, IGoogleOperations googleOperations, IConfiguration configuration)
     {
         _liteDB = liteDB;
         _googleOperations = googleOperations;
+        _configuration = configuration;
     }
 
     public IActionResult Index()
     {
         Google.Apis.Drive.v3.Data.About userInfo = _googleOperations.GetUserInfo();
 
-        HomeViewModel viewInfo = new HomeViewModel()
+        int uploadRecordCount = Convert.ToInt32(_configuration["AppSettings:DetailDownloadRecordsCount"]);
+        DownloadRecordsViewModel viewInfo = new DownloadRecordsViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
-            UploadInfo = _liteDB.LastUploadRecords(),
-            UploadCount = _liteDB.CountUploadRecords(),
-            DownloadInfo = _liteDB.LastDownloadRecords(),
-            DownloadCount = _liteDB.CountDownloadRecords(),
-            InfoInfo = _liteDB.LastInformationRecords(),
-            InfoCount = _liteDB.CountInfoRecords(),
-            ErrorInfo = _liteDB.LastErrorRecords(),
-            ErrorCount = _liteDB.CountErrorRecords()
+            DownloadInfo = _liteDB.LastDownloadRecords(uploadRecordCount),
+            DownloadCount = _liteDB.CountDownloadRecords()
         };
 
         return View(viewInfo);

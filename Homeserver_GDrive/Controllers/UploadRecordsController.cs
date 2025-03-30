@@ -23,7 +23,7 @@ public class UploadRecordsController : Controller
         Google.Apis.Drive.v3.Data.About userInfo = _googleOperations.GetUserInfo();
 
         int uploadRecordCount = Convert.ToInt32(_configuration["AppSettings:DetailUploadRecordsCount"]);
-        UploadrRecordsViewModel viewInfo = new UploadrRecordsViewModel()
+        UploadRecordsViewModel viewInfo = new UploadRecordsViewModel()
         {
             ServiceAccountName = userInfo.User.DisplayName,
             UploadInfo = _liteDB.LastUploadRecords(uploadRecordCount),

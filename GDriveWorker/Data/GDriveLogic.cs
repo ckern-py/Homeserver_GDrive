@@ -10,6 +10,9 @@ namespace GDriveWorker.Data
         private readonly ISQLiteDB _sqliteDB;
         private readonly IConfiguration _configuration;
 
+        private static readonly string uploadLocation = "/../media/upload";
+        private static readonly string downloadLocation = "/../media/download";
+
         public GDriveLogic(ILogger<GDriveLogic> logger, IGoogleOperations googleOperations, ISQLiteDB sqliteDB, IConfiguration configuration)
         {
             _logger = logger;
@@ -20,7 +23,7 @@ namespace GDriveWorker.Data
 
         public void UploadMediaDirectory(string location)
         {
-            string topLevelFolder = _configuration["AppSettings:TopLevelGDriveFolder"];
+            string topLevelFolder = _configuration["AppSettings:TopLevelGDriveUploadFolder"] ?? "";
             string parentFolderID = _googleOperation.FindFolderID(topLevelFolder);
 
             if (string.IsNullOrWhiteSpace(parentFolderID))
@@ -45,7 +48,7 @@ namespace GDriveWorker.Data
 
                 if (string.IsNullOrWhiteSpace(fileID))
                 {
-                    _sqliteDB.InsertInformationdRecord($"File {file} not found, uploading it", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Drive file {RemovePathBeginning(file)} not found, uploading it", DateTime.Now.ToString());
                     fileStatus = _googleOperation.UploadFile(file, parentFolderID);
                 }
                 else
@@ -54,19 +57,19 @@ namespace GDriveWorker.Data
                     DateTime lastUpload = _sqliteDB.GetFileUploadTime(file);
                     if (lastWrite > lastUpload)
                     {
-                        _sqliteDB.InsertInformationdRecord($"File {file} found, updating it", DateTime.Now.ToString());
+                        _sqliteDB.InsertInformationdRecord($"Drive file {RemovePathBeginning(file)} found, updating it", DateTime.Now.ToString());
                         fileStatus = _googleOperation.UpdateFile(file, fileID);
                     }
                     else
                     {
-                        _sqliteDB.InsertInformationdRecord($"File {file} has no changes, not updating", DateTime.Now.ToString());
+                        _sqliteDB.InsertInformationdRecord($"Drive file {RemovePathBeginning(file)} has no changes, not updating", DateTime.Now.ToString());
                         continue;
                     }
                 }
 
                 if (fileStatus.Status == UploadStatus.Completed)
                 {
-                    _sqliteDB.InsertUploadRecord(file, DateTime.Now.ToString());
+                    _sqliteDB.InsertUploadRecord(RemovePathBeginning(file), DateTime.Now.ToString());
                 }
                 else
                 {
@@ -85,14 +88,109 @@ namespace GDriveWorker.Data
                 string folderID = _googleOperation.FindFolderID(justFolder, parentFolderID);
                 if (string.IsNullOrWhiteSpace(folderID))
                 {
-                    _sqliteDB.InsertInformationdRecord($"Folder {directory} not found, creating it", DateTime.Now.ToString());
+                    _sqliteDB.InsertInformationdRecord($"Drive folder {RemovePathBeginning(directory)} not found, creating it", DateTime.Now.ToString());
                     folderID = _googleOperation.CreateFolder(justFolder, parentFolderID);
-                    _sqliteDB.InsertUploadRecord(directory, DateTime.Now.ToString());
+                    _sqliteDB.InsertUploadRecord(RemovePathBeginning(directory), DateTime.Now.ToString());
                 }
 
                 UploadFiles(directory, folderID);
                 UploadFolder(directory, folderID);
             }
+        }
+
+        public void DownloadMediaDirectory(string location)
+        {
+            string allDownloadFolders = _configuration["AppSettings:TopLevelGDriveDownloadFolder"] ?? "";
+            string[] foldersArray = allDownloadFolders.Split(',');
+
+            foreach (string topLevelFolder in foldersArray)
+            {
+                string parentFolderID = _googleOperation.FindFolderID(topLevelFolder);
+
+                if (string.IsNullOrWhiteSpace(parentFolderID))
+                {
+                    _logger.LogInformation("Could not find parent folder {parent}", topLevelFolder);
+                    _sqliteDB.InsertInformationdRecord($"Could not find parent folder {topLevelFolder}", DateTime.Now.ToString());
+                    continue;
+                }
+
+                string combinedDownloadPath = Path.Combine(location, topLevelFolder);
+                if (!Directory.Exists(combinedDownloadPath))
+                {
+                    _sqliteDB.InsertInformationdRecord($"Local folder {RemovePathBeginning(combinedDownloadPath)} not found, creating it", DateTime.Now.ToString());
+                    Directory.CreateDirectory(combinedDownloadPath);
+                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedDownloadPath), DateTime.Now.ToString());
+                }
+
+                DownloadFiles(combinedDownloadPath, parentFolderID);
+
+                DownloadFolder(combinedDownloadPath, parentFolderID);
+            }
+        }
+
+        private void DownloadFiles(string location, string parentFolderID)
+        {
+            List<Google.Apis.Drive.v3.Data.File> filesList = _googleOperation.FindAllFiles(parentFolderID);
+
+            foreach (Google.Apis.Drive.v3.Data.File googleFile in filesList)
+            {
+                string combinedFilePath = Path.Combine(location, googleFile.Name);
+                if (!File.Exists(combinedFilePath))
+                {
+                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedFilePath)} not found, downloading it", DateTime.Now.ToString());
+
+                    try
+                    {
+                        MemoryStream stream = _googleOperation.DownloadFile(googleFile.Id);
+                        using (FileStream fileStream = new FileStream(combinedFilePath, FileMode.Create, FileAccess.Write))
+                        {
+                            stream.WriteTo(fileStream);
+                        }
+                        _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedFilePath), DateTime.Now.ToString());
+                    }
+                    catch (Exception e)
+                    {
+                        _sqliteDB.InsertErrorRecord($"Failed to download: {e.Message}", DateTime.Now.ToString());
+                    }
+                }
+                else
+                {
+                    _sqliteDB.InsertInformationdRecord($"Local file {RemovePathBeginning(combinedFilePath)} found, not downloading", DateTime.Now.ToString());
+                }
+            }
+        }
+
+        private void DownloadFolder(string location, string parentFolderID)
+        {
+            List<Google.Apis.Drive.v3.Data.File> folderList = _googleOperation.FindAllFolders(parentFolderID);
+
+            foreach (Google.Apis.Drive.v3.Data.File googleFolders in folderList)
+            {
+                string combinedFolderPath = Path.Combine(location, googleFolders.Name);
+                if (!Directory.Exists(combinedFolderPath))
+                {
+                    _sqliteDB.InsertInformationdRecord($"Local folder {RemovePathBeginning(combinedFolderPath)} not found, creating it", DateTime.Now.ToString());
+                    Directory.CreateDirectory(combinedFolderPath);
+                    _sqliteDB.InsertDownloadRecord(RemovePathBeginning(combinedFolderPath), DateTime.Now.ToString());
+                }
+
+                DownloadFiles(combinedFolderPath, googleFolders.Id);
+                DownloadFolder(combinedFolderPath, googleFolders.Id);
+            }
+        }
+
+        private static string RemovePathBeginning(string location)
+        {
+            if (location.Contains(uploadLocation))
+            {
+                location = location.Remove(0, uploadLocation.Length);
+            }
+            else if (location.Contains(downloadLocation))
+            {
+                location = location.Remove(0, downloadLocation.Length);
+            }
+
+            return location;
         }
     }
 }
