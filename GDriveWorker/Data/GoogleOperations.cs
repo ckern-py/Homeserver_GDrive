@@ -317,6 +317,8 @@ namespace GDriveWorker.Data
                     return "application/yaml";
                 case ".sh":
                     return "text/x-shellscript";
+                case ".mkv":
+                    return "video/matroska";
                 default:
                     return "application/octet-stream";
             }
