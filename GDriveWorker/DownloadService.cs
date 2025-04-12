@@ -22,11 +22,25 @@ namespace GDriveWorker
             while (!stoppingToken.IsCancellationRequested)
             {
                 _sqliteDB.InsertInformationdRecord($"Running DownloadService", DateTime.Now.ToString());
-                if (_logger.IsEnabled(LogLevel.Information))
+
+                Boolean.TryParse(_configuration["AppSettings:RunDownloadService"], out bool runService);
+
+                if (runService)
                 {
-                    _logger.LogInformation("Running DownloadService at {dateTime}", DateTime.Now);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("Running DownloadService at {dateTime}", DateTime.Now);
+                    }
+                    Task.Run(() => _gDriveLogic.DownloadMediaDirectory("/../media/download"));
                 }
-                Task.Run(() => _gDriveLogic.DownloadMediaDirectory("/../media/download"));
+                else
+                {
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("DownloadService is currently disabled");
+                    }
+                    _sqliteDB.InsertInformationdRecord("DownloadService is currently disabled", DateTime.Now.ToString());
+                }
 
                 double delayHours = Convert.ToDouble(_configuration["AppSettings:DownloadServiceDelayHours"]);
                 _sqliteDB.InsertInformationdRecord($"DownloadService will execute again in {delayHours} hours", DateTime.Now.ToString());

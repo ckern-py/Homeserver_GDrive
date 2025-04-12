@@ -22,11 +22,25 @@ namespace GDriveWorker
             while (!stoppingToken.IsCancellationRequested)
             {
                 _sqliteDB.InsertInformationdRecord($"Running UploadService", DateTime.Now.ToString());
-                if (_logger.IsEnabled(LogLevel.Information))
+
+                Boolean.TryParse(_configuration["AppSettings:RunUploadService"], out bool runService);
+
+                if (runService)
                 {
-                    _logger.LogInformation("Running UploadService at {dateTime}", DateTime.Now);
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("Running UploadService at {dateTime}", DateTime.Now);
+                    }
+                    Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/upload"));
                 }
-                Task.Run(() => _gDriveLogic.UploadMediaDirectory("/../media/upload"));
+                else
+                {
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("UploadService is currently disabled");
+                    }                    
+                    _sqliteDB.InsertInformationdRecord("UploadService is currently disabled", DateTime.Now.ToString());
+                }                
 
                 double delayHours = Convert.ToDouble(_configuration["AppSettings:UploadServiceDelayHours"]);
                 _sqliteDB.InsertInformationdRecord($"UploadService will execute again in {delayHours} hours", DateTime.Now.ToString());

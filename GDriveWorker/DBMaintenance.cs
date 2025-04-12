@@ -1,4 +1,5 @@
-﻿using GDriveWorker.Domain;
+﻿using GDriveWorker.Data;
+using GDriveWorker.Domain;
 
 namespace GDriveWorker
 {
@@ -25,39 +26,52 @@ namespace GDriveWorker
                 }
                 _sqliteDB.InsertInformationdRecord($"Running DBMaintenance", DateTime.Now.ToString());
 
-                int delUploadCount = _sqliteDB.DeleteOldFileUploadsRecords();
-                _sqliteDB.InsertInformationdRecord($"Removed {delUploadCount} records from [FileUploads]", DateTime.Now.ToString());
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    _logger.LogInformation("Removed {delUploadCount} records from [FileUploads] at {datetime}", delUploadCount, DateTime.Now);
-                }
+                Boolean.TryParse(_configuration["AppSettings:RunDBMaintenance"], out bool runService);
 
-                int delDownloadCount = _sqliteDB.DeleteOldFileDownloadsRecords();
-                _sqliteDB.InsertInformationdRecord($"Removed {delDownloadCount} records from [FileDownloads]", DateTime.Now.ToString());
-                if (_logger.IsEnabled(LogLevel.Information))
+                if (runService)
                 {
-                    _logger.LogInformation("Removed {delUploadCount} records from [FileDownloads] at {datetime}", delDownloadCount, DateTime.Now);
-                }
+                    int delUploadCount = _sqliteDB.DeleteOldFileUploadsRecords();
+                    _sqliteDB.InsertInformationdRecord($"Removed {delUploadCount} records from [FileUploads]", DateTime.Now.ToString());
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("Removed {delUploadCount} records from [FileUploads] at {datetime}", delUploadCount, DateTime.Now);
+                    }
 
-                int delErrorCount = _sqliteDB.DeleteOldErrorsRecords();
-                _sqliteDB.InsertInformationdRecord($"Removed {delErrorCount} records from [Errors]", DateTime.Now.ToString());
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    _logger.LogInformation("Removed {delErrorCount} records from [Errors] at {datetime}", delErrorCount, DateTime.Now);
-                }
+                    int delDownloadCount = _sqliteDB.DeleteOldFileDownloadsRecords();
+                    _sqliteDB.InsertInformationdRecord($"Removed {delDownloadCount} records from [FileDownloads]", DateTime.Now.ToString());
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("Removed {delUploadCount} records from [FileDownloads] at {datetime}", delDownloadCount, DateTime.Now);
+                    }
 
-                int delInfoCount = _sqliteDB.DeleteOldInformationRecords();
-                _sqliteDB.InsertInformationdRecord($"Removed {delInfoCount} records from [Information]", DateTime.Now.ToString());
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    _logger.LogInformation("Removed {delInfoCount} records from [Information] at {datetime}", delInfoCount, DateTime.Now);
-                }
+                    int delErrorCount = _sqliteDB.DeleteOldErrorsRecords();
+                    _sqliteDB.InsertInformationdRecord($"Removed {delErrorCount} records from [Errors]", DateTime.Now.ToString());
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("Removed {delErrorCount} records from [Errors] at {datetime}", delErrorCount, DateTime.Now);
+                    }
 
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    _logger.LogInformation("DBMaintenance finished {dateTime}", DateTime.Now);
+                    int delInfoCount = _sqliteDB.DeleteOldInformationRecords();
+                    _sqliteDB.InsertInformationdRecord($"Removed {delInfoCount} records from [Information]", DateTime.Now.ToString());
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("Removed {delInfoCount} records from [Information] at {datetime}", delInfoCount, DateTime.Now);
+                    }
+
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("DBMaintenance finished {dateTime}", DateTime.Now);
+                    }
+                    _sqliteDB.InsertInformationdRecord($"DBMaintenance finished", DateTime.Now.ToString());
                 }
-                _sqliteDB.InsertInformationdRecord($"DBMaintenance finished", DateTime.Now.ToString());
+                else
+                {
+                    if (_logger.IsEnabled(LogLevel.Information))
+                    {
+                        _logger.LogInformation("DBMaintenance is currently disabled");
+                    }
+                    _sqliteDB.InsertInformationdRecord("DBMaintenance is currently disabled", DateTime.Now.ToString());
+                }
 
                 double delayHours = Convert.ToDouble(_configuration["AppSettings:DBMaintenanceDelayHours"]);
                 _sqliteDB.InsertInformationdRecord($"DBMaintenance will execute again in {delayHours} hours", DateTime.Now.ToString());
