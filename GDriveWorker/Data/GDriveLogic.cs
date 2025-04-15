@@ -81,10 +81,17 @@ namespace GDriveWorker.Data
         private void UploadFolder(string location, string parentFolderID)
         {
             string[] dir = Directory.GetDirectories(location);
+            string[] excludedDir = _configuration["AppSettings:UploadExcludeFolders"].Split(",");
 
             foreach (string directory in dir)
             {
                 string justFolder = new DirectoryInfo(directory).Name;
+                if (excludedDir.Contains(justFolder))
+                {
+                    _sqliteDB.InsertInformationdRecord($"Skipping excluded directory {justFolder}", DateTime.Now.ToString());
+                    continue;
+                }
+                
                 string folderID = _googleOperation.FindFolderID(justFolder, parentFolderID);
                 if (string.IsNullOrWhiteSpace(folderID))
                 {
